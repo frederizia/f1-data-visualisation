@@ -25,3 +25,11 @@ ty:
 .PHONY: test
 test:
 	uv run pytest tests
+
+
+.env:
+	cp .env.default .env
+
+
+.PHONY: dev
+dev: .env install_dependencies precommit

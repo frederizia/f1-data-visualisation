@@ -47,7 +47,14 @@ installed using
 
 ## Local development
 
-Please install pre-commit hooks using
+When starting to work on this project, you can simply run
+
+```shell
+    make dev
+```
+to copy the default `.env` file, install dependencies and the pre-commit hooks.
+
+Otherwise, pre-commit can be set up using:
 
 ```shell
   make precommit
