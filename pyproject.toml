@@ -18,6 +18,7 @@ version = "0.1.0"
 
 dependencies = [
     "fastf1>=3.7.0",
+    "invoke>=2.2.1",
 ]
 
 [dependency-groups]
