@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:*)",
+      "Bash(ty:*)",
+      "Bash(uv run ty:*)",
+      "Bash(.venv/bin/ty:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(make:*)",
+      "Bash(cat:*)",
+      "Bash(uv run pytest:*)",
+      "Bash(uv run ruff:*)",
+      "Bash(pytest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(.venv/bin/pytest:*)",
+      "Bash(.venv/bin/python -m pytest:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git diff:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote:*)",
+      "Bash(git ls-files:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git describe:*)",
+      "Bash(git blame:*)",
+      "Bash(git reflog:*)",
+      "Bash(git config --get:*)",
+      "Bash(git fetch:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

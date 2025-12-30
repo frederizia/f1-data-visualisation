@@ -1,0 +1,134 @@
+# ---------
+# Packaging
+# ---------
+
+# Simple build backend which looks for packages in the `src` directory.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# -------
+# Project
+# -------
+
+[project]
+name = "f1_data_visualisation"
+requires-python = ">=3.13"
+version = "0.1.0"
+
+dependencies = [
+]
+
+[dependency-groups]
+dev = [
+    # Testing
+    "pytest",
+
+    # Localdev
+    "pre-commit",
+
+    # Linting
+    # We pin the version so that we don't update ruff and cause a lot of linting errors. Upgrades should be done
+    # deliberately.
+    "ruff<0.14.10",
+    # Type checking
+    "ty",
+]
+
+# ---------
+# Hatchling
+# ---------
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/f1_data_visualisation"]
+
+
+# ----
+# Ruff
+# ----
+
+[tool.ruff]
+line-length = 99
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN002", # Missing type annotation for *{name}
+    "ANN003", # Missing type annotation for **{name}
+    "ANN204", # Missing type annotation for dunder method
+    "ANN401", # Dynamically typed expressions (typing.Any) are disallowed in {name}
+    "ARG", # flake8-unused-arguments
+    "COM812", # Trailing comma missing
+    "D1", # Missing docstring in {}
+    "D200", # One-line docstring should fit on one line
+    "D203", # 1 blank line required before class docstring
+    "D212", # Multi-line docstring summary should start at the first line
+    "D301", # Use r""" if any backslashes in a docstring
+    "D406", # Section name should end with a newline ("{name}")
+    "D407", # Missing dashed underline after section ("{name}")
+    "D408", # Section underline should be in the line following the section's name ("{name}")
+    "D413", # Missing blank line after last section ("{name}")
+    "E501", # Line too long
+    "EM", # flake8-errmsg
+    "ERA001", # Found commented-out code
+    "FIX", # flake8-fixme
+    "PLC0414", # Import alias does not rename original package
+    "PLR0904", # Too many public methods (x > 20)
+    "PLR0911", # Too many return statements (x > 6)
+    "PLR0912", # Too many branches (x > 12)
+    "PLR0913", # Too many arguments to function call (x > 5)
+    "PLR2004", # Magic value used in comparison, consider replacing 4 with a constant variable
+    "PLR5501", # Use `elif` instead of `else` then `if`, to reduce indentation
+    "PLR6301", # Method `foo` could be a function or static method
+    "PYI041", # Use `float` instead of `int | float`
+    "RUF001", # String contains ambiguous `'` (RIGHT SINGLE QUOTATION MARK). Did you mean ``` (GRAVE ACCENT)?
+    "S101",  # Use of `assert` detected
+    "S311",  # Standard pseudo-random generators are not suitable for cryptographic purposes
+    "SIM102",  # Use a single `if` statement instead of nested `if` statements
+    "SIM108",  # Use ternary operator ... instead of `if`-`else`-block
+    "SIM910",  # Use `{"foo": "bar"}.get(value)` instead of `{"foo": "bar"}.get(value, None)`
+    "TC001", # https://docs.astral.sh/ruff/rules/typing-only-first-party-import/
+    "TC002", # https://docs.astral.sh/ruff/rules/typing-only-third-party-import/
+    "TC003", # https://docs.astral.sh/ruff/rules/typing-only-standard-library-import/
+    "TD002", # Missing author in TODO
+    "TD003", # Missing issue link on the line following this TODO
+    "TRY003", # Avoid specifying long messages outside the exception class
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401", # Allow unused imports in __init__ files as these are convenience imports
+]
+"tests/**" = [
+    "ANN",  # Allow missing type annotations in tests
+]
+
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "project",
+    "local-folder",
+]
+
+[tool.ruff.lint.isort.sections]
+"project" = [
+    "f1_data_visualisation",
+    "tests",
+]
+
+[tool.ruff.lint.flake8-builtins]
+strict-checking = true
+
+
+# --
+# Ty
+# --
+
+[tool.ty.src]
+include = ["src"]
+exclude = ["build", "tests"]
