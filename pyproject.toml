@@ -17,8 +17,10 @@ requires-python = ">=3.13"
 version = "0.1.0"
 
 dependencies = [
+    "alembic>=1.17.2",
     "fastf1>=3.7.0",
     "invoke>=2.2.1",
+    "sqlalchemy>=2.0.45",
 ]
 
 [dependency-groups]
