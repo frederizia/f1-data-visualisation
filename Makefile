@@ -33,3 +33,25 @@ test:
 
 .PHONY: dev
 dev: .env install_dependencies precommit
+
+# Database related commands
+.PHONY: run_db_migrations
+run_db_migrations:
+	uv run alembic -c ./src/f1_data_visualisation/data/alembic.ini upgrade head
+
+
+.PHONY: downgrade_db_migration
+downgrade_db_migration:
+	uv run alembic -c ./src/f1_data_visualisation/data/alembic.ini downgrade -1
+
+
+.PHONY: build_migration
+build_migration:
+	uv run alembic -c ./src/f1_data_visualisation/data/alembic.ini revision --autogenerate -m "$(MESSAGE)"
+
+
+.PHONY: reset_database
+reset_database:
+	dropdb f1data --if-exists
+	createdb f1data
+	make run_db_migrations

@@ -78,6 +78,27 @@ Tests can be run using
   make test
 ```
 
+## Database
+
+This project uses a PostgresQL 16 database. You can create (or recreate) a local database using
+```shell
+  make reset_database
+```
+
+Other useful commands for database management are:
+
+```shell
+  make run_db_migrations      # Run pending database migrations
+  make downgrade_db_migration # Downgrade to previous migration
+  make build_migration        # Create a new migration (requires MESSAGE env var)
+```
+
+For example, to create a new migration:
+```shell
+  make build_migration MESSAGE="Add users table"
+```
+
+
 
 -----
 
