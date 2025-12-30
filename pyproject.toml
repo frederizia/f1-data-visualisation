@@ -17,6 +17,7 @@ requires-python = ">=3.13"
 version = "0.1.0"
 
 dependencies = [
+    "fastf1>=3.7.0",
 ]
 
 [dependency-groups]
