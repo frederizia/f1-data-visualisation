@@ -1,6 +1,14 @@
 # F1 data visualisation
 
-TODO: Describe your project here.
+This is a project to play around with some F1 data and visualise it. This is not
+intended to be deployed anywhere, it's just for local exploration and learning.
+
+The plan is to
+* use `fastf1` to get F1 data
+* store the data in the database using `sqlalchemy`
+* use `streamlit` to display the data
+
+The focus is a driver season and career view, as opposed to telemetry data.
 
 ## Basic setup
 
