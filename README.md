@@ -91,6 +91,7 @@ Other useful commands for database management are:
   make run_db_migrations      # Run pending database migrations
   make downgrade_db_migration # Downgrade to previous migration
   make build_migration        # Create a new migration (requires MESSAGE env var)
+  make discover_missing_migrations  # Check if there are any migrations missing for database changes
 ```
 
 For example, to create a new migration:

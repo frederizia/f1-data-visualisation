@@ -55,3 +55,12 @@ reset_database:
 	dropdb f1data --if-exists
 	createdb f1data
 	make run_db_migrations
+
+
+.PHONY: discover_missing_migrations
+discover_missing_migrations:
+    # Create a temporary database to test migrations.
+	dropdb f1data-migrations --if-exists
+	createdb f1data-migrations
+	DATABASE_URL="postgresql://postgres@localhost/f1data-migrations" make run_db_migrations
+	DATABASE_URL="postgresql://postgres@localhost/f1data-migrations" uv run alembic -c src/f1_data_visualisation/data/alembic.ini check
