@@ -108,6 +108,11 @@ ignore = [
 "tests/**" = [
     "ANN",  # Allow missing type annotations in tests
 ]
+"src/f1_data_visualisation/data/migrations/versions/**" = [
+    "D400",  # First line should end with a period
+    "D415",  # First line should end with a period, question mark, or exclamation point
+    "N999",  # Invalid module name: {}
+]
 
 
 [tool.ruff.lint.isort]

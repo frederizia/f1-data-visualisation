@@ -4,6 +4,7 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from f1_data_visualisation import config as project_config
+from f1_data_visualisation.data import models
 
 
 # this is the Alembic Config object, which provides
@@ -22,7 +23,7 @@ config.set_main_option("sqlalchemy.url", project_config.DATABASE_URL)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = models.Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
