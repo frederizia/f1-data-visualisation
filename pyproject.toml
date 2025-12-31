@@ -21,6 +21,7 @@ dependencies = [
     "environs>=14.5.0",
     "factory-boy>=3.3.3",
     "fastf1>=3.7.0",
+    "import-linter>=2.9",
     "invoke>=2.2.1",
     "psycopg2>=2.9.11",
     "sqlalchemy>=2.0.45",
