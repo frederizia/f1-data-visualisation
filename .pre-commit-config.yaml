@@ -33,6 +33,7 @@ repos:
         name: "Check type hints with ty"
         language: system
         entry: "uv run ty check"
+        types: [python]
         require_serial: true
         pass_filenames: false
 

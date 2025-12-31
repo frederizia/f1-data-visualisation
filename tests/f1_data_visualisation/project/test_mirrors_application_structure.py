@@ -1,9 +1,9 @@
 import re
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 
+import attrs
 import pytest
 
 
@@ -24,7 +24,7 @@ def test_tests_mirror_application_modules() -> None:
         pytest.fail(msg, pytrace=False)
 
 
-@dataclass
+@attrs.frozen
 class MisplacedTest:
     filepath: str
     possible_application_paths: tuple[str, ...]
