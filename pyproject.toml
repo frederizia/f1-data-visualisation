@@ -158,3 +158,35 @@ exclude = ["build", "tests"]
 python_files = "test_*.py"
 testpaths = "tests"
 pythonpath = ["."]
+
+
+# -------------
+# Import linter
+# -------------
+
+[tool.importlinter]
+root_package = "f1_data_visualisation"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Top level layers"
+type = "layers"
+exhaustive = true
+containers = ["f1_data_visualisation"]
+layers = [
+    # Entrypoint
+    "main",
+    # Domain layer
+    "domain",
+    # Data layer
+    "data",
+    # Anywhere can import config
+    "config",
+
+]
+
+[[tool.importlinter.contracts]]
+name = "Domain: queries cannot import from operations"
+type = "forbidden"
+source_modules = ["f1_data_visualisation.domain.*.queries"]
+forbidden_modules = ["f1_data_visualisation.domain.*.operations"]

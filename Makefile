@@ -27,6 +27,11 @@ test:
 	uv run pytest tests
 
 
+.PHONY:import_linter
+import_linter:
+	uv run lint-imports
+
+
 .env:
 	cp .env.default .env
 

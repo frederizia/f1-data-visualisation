@@ -78,6 +78,13 @@ Tests can be run using
   make test
 ```
 
+The import linter can be run using
+
+```shell
+  make import_linter
+```
+
+
 ## Database
 
 This project uses a PostgresQL 16 database. You can create (or recreate) a local database using
