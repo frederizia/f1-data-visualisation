@@ -43,12 +43,12 @@ repos:
         entry: "make test"
         require_serial: true
         pass_filenames: false
-        always_run: true
+        types: [python]
 
       - id: check-all-migrations-generated
         name: "Check all migrations are generated"
         language: system
         entry: "make discover_missing_migrations"
+        files: "src/f1_data_visualisation/data/models/.*\\.py$"
         require_serial: true
         pass_filenames: false
-        always_run: true
