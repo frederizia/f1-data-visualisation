@@ -190,3 +190,12 @@ name = "Domain: queries cannot import from operations"
 type = "forbidden"
 source_modules = ["f1_data_visualisation.domain.*.queries"]
 forbidden_modules = ["f1_data_visualisation.domain.*.operations"]
+
+[[tool.importlinter.contracts]]
+name = "Domain modules hierarchy"
+type = "layers"
+containers = ["f1_data_visualisation.domain"]
+layers = [
+    "rounds",
+    "seasons",
+]
