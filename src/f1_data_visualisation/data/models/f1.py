@@ -45,5 +45,27 @@ class Round(Base):
     date_from: Mapped[datetime.date] = mapped_column(nullable=False)
     date_to: Mapped[datetime.date] = mapped_column(nullable=False)
 
+    sessions = relationship("Session", back_populates="round")
+
     def __repr__(self) -> str:
         return f"{self.name} {self.season.year} (Round {self.number})"
+
+
+class Session(Base):
+    """
+    Store information about a session (practice, qualifying, race).
+    """
+
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    # Round this session is part of.
+    round_id: Mapped[int] = mapped_column(ForeignKey("rounds.id"), nullable=False)
+    round = relationship("Round", back_populates="sessions")
+
+    type: Mapped[str] = mapped_column(nullable=False)
+    date: Mapped[datetime.date] = mapped_column(nullable=False)
+
+    def __repr__(self) -> str:
+        return f"{self.type} - {self.date}"

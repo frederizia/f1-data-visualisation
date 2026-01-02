@@ -1,4 +1,4 @@
-from .f1 import Round, Season
+from .f1 import Round, Season, Session
 
 
-__all__ = ["Round", "Season"]
+__all__ = ["Round", "Season", "Session"]
