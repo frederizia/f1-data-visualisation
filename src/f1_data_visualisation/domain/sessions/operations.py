@@ -12,7 +12,7 @@ class CannotCreateSessionError(Exception):
 
 
 def get_or_create_session(
-    session: orm.Session,
+    db_session: orm.Session,
     round_number: int,
     year: int,
     session_type: entities.SessionType,
@@ -22,7 +22,7 @@ def get_or_create_session(
     Create a new session entry in the database, if it doesn't exist yet.
     """
     round_entity = round_queries.get_round(
-        session=session,
+        db_session=db_session,
         number=round_number,
         year=year,
     )
@@ -30,7 +30,7 @@ def get_or_create_session(
         raise CannotCreateSessionError(f"Round {round_number} in {year} not found")
 
     existing_session = queries.get_session_by_type(
-        session=session,
+        db_session=db_session,
         round_number=round_number,
         year=year,
         session_type=session_type,
@@ -42,8 +42,8 @@ def get_or_create_session(
         type=session_type.value,
         date=date,
     )
-    session.add(session_model)
-    session.flush()
+    db_session.add(session_model)
+    db_session.flush()
     return entities.Session(
         id=session_model.id,
         round=round_entity,

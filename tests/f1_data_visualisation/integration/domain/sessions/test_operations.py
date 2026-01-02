@@ -11,7 +11,7 @@ class TestGetOrCreateSession:
         session_type = entities.SessionType.PRACTICE_1
 
         session_entity = operations.get_or_create_session(
-            session=db_session,
+            db_session=db_session,
             round_number=round_model.number,
             year=round_model.season.year,
             session_type=session_type,
@@ -27,7 +27,7 @@ class TestGetOrCreateSession:
         existing_session = factories.Session(date=date)
 
         session_entity = operations.get_or_create_session(
-            session=db_session,
+            db_session=db_session,
             round_number=existing_session.round.number,
             year=existing_session.round.season.year,
             session_type=entities.SessionType(existing_session.type),

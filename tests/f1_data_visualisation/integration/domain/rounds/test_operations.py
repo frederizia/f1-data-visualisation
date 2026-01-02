@@ -15,7 +15,7 @@ class TestGetOrCreateRound:
         date_to = datetime.date(2023, 5, 28)
 
         round_entity = operations.get_or_create_round(
-            session=db_session,
+            db_session=db_session,
             year=year,
             number=number,
             country=country,
@@ -42,7 +42,7 @@ class TestGetOrCreateRound:
         )
 
         round_entity = operations.get_or_create_round(
-            session=db_session,
+            db_session=db_session,
             year=year,
             number=number,
             country="Test",

@@ -8,7 +8,7 @@ class TestGetSeasonByYear:
         existing_season = factories.Season(year=year)
 
         season = queries.get_season_by_year(
-            session=db_session,
+            db_session=db_session,
             year=year,
         )
 
@@ -18,7 +18,7 @@ class TestGetSeasonByYear:
         year = 1999
 
         season = queries.get_season_by_year(
-            session=db_session,
+            db_session=db_session,
             year=year,
         )
 

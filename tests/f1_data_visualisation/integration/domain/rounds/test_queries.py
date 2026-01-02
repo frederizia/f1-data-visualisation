@@ -12,7 +12,7 @@ class TestGetRound:
         )
 
         round_entity = queries.get_round(
-            session=db_session,
+            db_session=db_session,
             year=year,
             number=number,
         )
@@ -26,7 +26,7 @@ class TestGetRound:
         number = 1
 
         round_entity = queries.get_round(
-            session=db_session,
+            db_session=db_session,
             year=year,
             number=number,
         )
@@ -38,7 +38,7 @@ class TestGetRound:
         factories.Round(number=1, season__year=year)
 
         round_entity = queries.get_round(
-            session=db_session,
+            db_session=db_session,
             year=year,
             number=2,
         )

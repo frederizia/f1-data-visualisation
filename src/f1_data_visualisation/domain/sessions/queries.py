@@ -8,7 +8,7 @@ from f1_data_visualisation.domain.sessions import entities
 
 
 def get_session_by_type(
-    session: orm.Session,
+    db_session: orm.Session,
     round_number: int,
     year: int,
     session_type: entities.SessionType,
@@ -29,7 +29,7 @@ def get_session_by_type(
         )
     )
     try:
-        session_model = session.execute(query).scalars().one()
+        session_model = db_session.execute(query).scalars().one()
     except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
         return None
     round_entity = round_entities.Round(
@@ -53,7 +53,7 @@ def get_session_by_type(
 
 
 def get_sessions_by_type_and_year(
-    session: orm.Session,
+    db_session: orm.Session,
     session_type: str,
     year: int,
 ) -> list[entities.Session]:
@@ -70,7 +70,7 @@ def get_sessions_by_type_and_year(
         )
         .order_by(models.Round.number)
     )
-    session_models = session.execute(query).scalars().all()
+    session_models = db_session.execute(query).scalars().all()
     return [
         entities.Session(
             id=session_model.id,

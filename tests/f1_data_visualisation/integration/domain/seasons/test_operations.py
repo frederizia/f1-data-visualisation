@@ -7,7 +7,7 @@ class TestGetOrCreateSeason:
         year = 2023
 
         season = operations.get_or_create_season(
-            session=db_session,
+            db_session=db_session,
             year=year,
         )
 
@@ -18,7 +18,7 @@ class TestGetOrCreateSeason:
         existing_season = factories.Season(year=year)
 
         season = operations.get_or_create_season(
-            session=db_session,
+            db_session=db_session,
             year=year,
         )
 
