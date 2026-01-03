@@ -92,3 +92,34 @@ def get_sessions_by_type_and_year(
         )
         for session_model in session_models
     ]
+
+
+def is_sprint_weekend(
+    db_session: orm.Session,
+    year: int,
+    round_number: int,
+) -> bool:
+    """
+    Determine if the given round is a sprint weekend.
+    """
+    query = (
+        sqlalchemy.select(models.Round)
+        .join(models.Season)
+        .join(models.Session)
+        .filter(
+            models.Season.year == year,
+            models.Round.number == round_number,
+        )
+    )
+
+    try:
+        round_model = db_session.execute(query).scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return False
+    for session in round_model.sessions:
+        if session.type in (
+            entities.SessionType.SPRINT_QUALIFYING.value,
+            entities.SessionType.SPRINT_RACE.value,
+        ):
+            return True
+    return False

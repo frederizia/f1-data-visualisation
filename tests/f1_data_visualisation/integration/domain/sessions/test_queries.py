@@ -1,3 +1,5 @@
+import pytest
+
 from f1_data_visualisation.domain.sessions import entities, queries
 from tests.f1_data_visualisation import factories
 
@@ -116,3 +118,43 @@ class TestGetSessionsByTypeAndYear:
 
         assert len(sessions) == 1
         assert sessions[0].type == entities.SessionType.PRACTICE_1
+
+
+class TestIsSprintWeekend:
+    @pytest.mark.parametrize(
+        "session_type",
+        [entities.SessionType.SPRINT_QUALIFYING, entities.SessionType.SPRINT_RACE],
+    )
+    def test_returns_true_if_there_are_sprint_sessions(self, session_type, db_session):
+        # Create session and associated round and season.
+        year = 2024
+        round_number = 23
+        factories.Session(
+            type=session_type.value, round__number=round_number, round__season__year=year
+        )
+        is_sprint = queries.is_sprint_weekend(
+            db_session=db_session, year=year, round_number=round_number
+        )
+        assert is_sprint
+
+    @pytest.mark.parametrize(
+        "session_type",
+        [
+            entities.SessionType.PRACTICE_1,
+            entities.SessionType.PRACTICE_2,
+            entities.SessionType.PRACTICE_3,
+            entities.SessionType.QUALIFYING,
+            entities.SessionType.RACE,
+        ],
+    )
+    def test_returns_false_if_only_non_sprint_sessions(self, session_type, db_session):
+        # Create session and associated round and season.
+        year = 2024
+        round_number = 23
+        factories.Session(
+            type=session_type.value, round__number=round_number, round__season__year=year
+        )
+        is_sprint = queries.is_sprint_weekend(
+            db_session=db_session, year=year, round_number=round_number
+        )
+        assert not is_sprint
