@@ -1,6 +1,9 @@
+import datetime
+
 import pytest
 
-from f1_data_visualisation.domain.drivers import operations
+from f1_data_visualisation.domain.drivers import entities, operations
+from f1_data_visualisation.domain.sessions import entities as session_entities
 from tests.f1_data_visualisation import factories
 
 
@@ -123,3 +126,80 @@ class TestGetOrCreateConstructor:
 
         assert constructor.id is not None
         assert constructor.name == "New Constructor"
+
+
+class TestGetOrCreateRaceResult:
+    def test_retrieves_existing_result(self, db_session):
+        existing_result = factories.DriverRaceResult()
+        race_result = operations.get_or_create_race_result(
+            db_session,
+            driver_id=existing_result.driver.id,
+            session_id=existing_result.session.id,
+            constructor_name="Irrelevant",
+            position=1,
+            laps_completed=56,
+            points=25.0,
+            status=entities.DriverSessionClassificationStatus.CLASSIFIED,
+            grid_position=1,
+            time=datetime.time(hour=1, minute=30, second=15),
+        )
+
+        assert race_result.id == existing_result.id
+
+    def test_creates_new_result_if_not_exists(self, db_session):
+        driver = factories.Driver()
+        session = factories.Session(type=session_entities.SessionType.RACE.value)
+        constructor_name = "Python Racing"
+
+        race_result = operations.get_or_create_race_result(
+            db_session=db_session,
+            driver_id=driver.id,
+            session_id=session.id,
+            constructor_name=constructor_name,
+            position=2,
+            laps_completed=55,
+            points=18.0,
+            status=entities.DriverSessionClassificationStatus.CLASSIFIED,
+            grid_position=2,
+            time=datetime.time(hour=1, minute=32, second=10),
+        )
+
+        assert race_result.constructor.name == constructor_name
+        assert race_result.position == 2
+        assert race_result.laps_completed == 55
+
+
+class TestGetOrCreateQualifyingResult:
+    def test_retrieves_existing_result(self, db_session):
+        existing_result = factories.DriverQualifyingResult()
+        qualifying_result = operations.get_or_create_qualifying_result(
+            db_session,
+            driver_id=existing_result.driver.id,
+            session_id=existing_result.session.id,
+            constructor_name="Irrelevant",
+            position=1,
+            q1_time=datetime.time(hour=0, minute=1, second=15),
+            q2_time=datetime.time(hour=0, minute=1, second=10),
+            q3_time=datetime.time(hour=0, minute=1, second=5),
+        )
+
+        assert qualifying_result.id == existing_result.id
+
+    def test_creates_new_result_if_not_exists(self, db_session):
+        driver = factories.Driver()
+        session = factories.Session(type=session_entities.SessionType.QUALIFYING.value)
+        constructor_name = "Speedster F1"
+
+        qualifying_result = operations.get_or_create_qualifying_result(
+            db_session=db_session,
+            driver_id=driver.id,
+            session_id=session.id,
+            constructor_name=constructor_name,
+            position=3,
+            q1_time=datetime.time(hour=0, minute=1, second=20),
+            q2_time=datetime.time(hour=0, minute=1, second=15),
+            q3_time=datetime.time(hour=0, minute=1, second=10),
+        )
+
+        assert qualifying_result.constructor.name == constructor_name
+        assert qualifying_result.position == 3

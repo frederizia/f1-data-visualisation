@@ -94,6 +94,35 @@ def get_sessions_by_type_and_year(
     ]
 
 
+def get_session_by_id(db_session: orm.Session, database_id: int) -> entities.Session | None:
+    """
+    Retrieve a session using the database ID.
+    """
+    query = sqlalchemy.select(models.Session).filter(models.Session.id == database_id)
+    try:
+        session_model = db_session.execute(query).scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return None
+    round_entity = round_entities.Round(
+        id=session_model.round.id,
+        season=season_entities.Season(
+            id=session_model.round.season.id, year=session_model.round.season.year
+        ),
+        number=session_model.round.number,
+        country=session_model.round.country,
+        location=session_model.round.location,
+        name=session_model.round.name,
+        date_from=session_model.round.date_from,
+        date_to=session_model.round.date_to,
+    )
+    return entities.Session(
+        id=session_model.id,
+        round=round_entity,
+        type=entities.SessionType(session_model.type),
+        date=session_model.date,
+    )
+
+
 def is_sprint_weekend(
     db_session: orm.Session,
     year: int,

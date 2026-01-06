@@ -4,6 +4,7 @@ import random
 import factory
 
 from f1_data_visualisation.data import models
+from f1_data_visualisation.domain.drivers.entities import DriverSessionClassificationStatus
 from f1_data_visualisation.domain.sessions.entities import SessionType
 
 
@@ -79,3 +80,69 @@ class DriverSeason(factory.alchemy.SQLAlchemyModelFactory):
     driver = factory.SubFactory(Driver)
 
     season = factory.SubFactory(Season)
+
+
+class DriverRaceResult(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.DriverSessionResult
+        sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
+
+    id = factory.Sequence(lambda n: n + 1)
+
+    session = factory.SubFactory(Session, type=SessionType.RACE.value)
+    driver = factory.SubFactory(Driver)
+    constructor = factory.SubFactory(Constructor)
+
+    position = factory.LazyFunction(lambda: random.randint(1, 20))
+    laps_completed = factory.LazyFunction(lambda: random.randint(0, 70))
+    points = factory.LazyFunction(lambda: float(random.randint(0, 25)))
+    classification_status = factory.LazyFunction(
+        lambda: DriverSessionClassificationStatus.CLASSIFIED.value
+    )
+    grid_position = factory.LazyFunction(lambda: random.randint(1, 20))
+    time = factory.LazyFunction(
+        lambda: datetime.time(
+            hour=random.randint(0, 1),
+            minute=random.randint(0, 59),
+            second=random.randint(0, 59),
+            microsecond=random.randint(0, 999999),
+        ).isoformat()
+    )
+
+
+class DriverQualifyingResult(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.DriverSessionResult
+        sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
+
+    id = factory.Sequence(lambda n: n + 1)
+
+    session = factory.SubFactory(Session, type=SessionType.QUALIFYING.value)
+    driver = factory.SubFactory(Driver)
+    constructor = factory.SubFactory(Constructor)
+
+    position = factory.LazyFunction(lambda: random.randint(1, 20))
+    q1_time = factory.LazyFunction(
+        lambda: datetime.time(
+            hour=0,
+            minute=random.randint(0, 1),
+            second=random.randint(0, 59),
+            microsecond=random.randint(0, 999999),
+        ).isoformat()
+    )
+    q2_time = factory.LazyFunction(
+        lambda: datetime.time(
+            hour=0,
+            minute=random.randint(0, 1),
+            second=random.randint(0, 59),
+            microsecond=random.randint(0, 999999),
+        ).isoformat()
+    )
+    q3_time = factory.LazyFunction(
+        lambda: datetime.time(
+            hour=0,
+            minute=random.randint(0, 1),
+            second=random.randint(0, 59),
+            microsecond=random.randint(0, 999999),
+        ).isoformat()
+    )

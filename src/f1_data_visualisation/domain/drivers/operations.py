@@ -1,11 +1,18 @@
+import datetime
+
 from sqlalchemy import orm
 
 from f1_data_visualisation.data import models
 from f1_data_visualisation.domain.drivers import entities, queries
 from f1_data_visualisation.domain.seasons import queries as season_queries
+from f1_data_visualisation.domain.sessions import queries as session_queries
 
 
 class UnableToCreateDriverSeasonError(Exception):
+    pass
+
+
+class UnableToCreateDriverResultError(Exception):
     pass
 
 
@@ -88,4 +95,100 @@ def get_or_create_driver_season(
         short_code=driver_season_model.short_code,
         driver=driver,
         season=season,
+    )
+
+
+def get_or_create_race_result(
+    db_session: orm.Session,
+    driver_id: int,
+    session_id: int,
+    position: int,
+    constructor_name: str,
+    laps_completed: int,
+    points: float,
+    status: entities.DriverSessionClassificationStatus,
+    grid_position: int,
+    time: datetime.time | None,
+) -> entities.RaceDriverResult:
+    """
+    Create a new driver race result entry in the database, if it doesn't exist yet.
+    """
+    existing_result = queries.get_session_result_for_driver(
+        db_session=db_session, driver_id=driver_id, session_id=session_id
+    )
+    if existing_result:
+        assert isinstance(existing_result, entities.RaceDriverResult)
+        return existing_result
+    if not queries.get_driver_by_id(db_session=db_session, database_id=driver_id):
+        raise UnableToCreateDriverResultError(f"Driver matching ID {driver_id} does not exist.")
+    if not session_queries.get_session_by_id(db_session=db_session, database_id=session_id):
+        raise UnableToCreateDriverResultError(f"Session matching ID {session_id} does not exist.")
+    constructor = get_or_create_constructor(db_session=db_session, name=constructor_name)
+    result_model = models.DriverSessionResult(
+        driver_id=driver_id,
+        session_id=session_id,
+        constructor_id=constructor.id,
+        position=position,
+        laps_completed=laps_completed,
+        points=points,
+        classification_status=status.value,
+        grid_position=grid_position,
+        time=time.isoformat() if time else None,
+    )
+    db_session.add(result_model)
+    db_session.flush()
+    return entities.RaceDriverResult(
+        id=result_model.id,
+        constructor=constructor,
+        position=result_model.position,
+        laps_completed=result_model.laps_completed,
+        points=result_model.points,
+        status=status,
+        grid_position=result_model.grid_position,
+        time=time,
+    )
+
+
+def get_or_create_qualifying_result(
+    db_session: orm.Session,
+    driver_id: int,
+    session_id: int,
+    position: int,
+    constructor_name: str,
+    q1_time: datetime.time | None,
+    q2_time: datetime.time | None,
+    q3_time: datetime.time | None,
+) -> entities.QualifyingDriverResult:
+    """
+    Create a new driver qualifying result entry in the database, if it doesn't exist yet.
+    """
+    existing_result = queries.get_session_result_for_driver(
+        db_session=db_session, driver_id=driver_id, session_id=session_id
+    )
+    if existing_result:
+        assert isinstance(existing_result, entities.QualifyingDriverResult)
+        return existing_result
+    if not queries.get_driver_by_id(db_session=db_session, database_id=driver_id):
+        raise UnableToCreateDriverResultError(f"Driver matching ID {driver_id} does not exist.")
+    if not session_queries.get_session_by_id(db_session=db_session, database_id=session_id):
+        raise UnableToCreateDriverResultError(f"Session matching ID {session_id} does not exist.")
+    constructor = get_or_create_constructor(db_session=db_session, name=constructor_name)
+    result_model = models.DriverSessionResult(
+        driver_id=driver_id,
+        session_id=session_id,
+        constructor_id=constructor.id,
+        position=position,
+        q1_time=q1_time.isoformat() if q1_time else None,
+        q2_time=q2_time.isoformat() if q2_time else None,
+        q3_time=q3_time.isoformat() if q3_time else None,
+    )
+    db_session.add(result_model)
+    db_session.flush()
+    return entities.QualifyingDriverResult(
+        id=result_model.id,
+        constructor=constructor,
+        position=result_model.position,
+        q1_time=q1_time,
+        q2_time=q2_time,
+        q3_time=q3_time,
     )

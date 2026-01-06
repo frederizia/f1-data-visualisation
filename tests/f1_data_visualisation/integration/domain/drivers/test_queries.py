@@ -1,4 +1,7 @@
-from f1_data_visualisation.domain.drivers import queries
+import pytest
+
+from f1_data_visualisation.domain.drivers import entities, queries
+from f1_data_visualisation.domain.sessions import entities as session_entities
 from tests.f1_data_visualisation import factories
 
 
@@ -115,3 +118,65 @@ class TestGetConstructor:
         )
 
         assert constructor is None
+
+
+class TestGetSessionResultForDriver:
+    def test_returns_race_result_for_driver_if_exists(self, db_session):
+        existing_result = factories.DriverRaceResult()
+
+        result = queries.get_session_result_for_driver(
+            db_session=db_session,
+            session_id=existing_result.session.id,
+            driver_id=existing_result.driver.id,
+        )
+
+        assert result.id == existing_result.id
+        assert result.position == existing_result.position
+        assert isinstance(result, entities.RaceDriverResult)
+
+    def test_returns_qualifying_result_for_driver_if_exists(self, db_session):
+        existing_result = factories.DriverQualifyingResult()
+
+        result = queries.get_session_result_for_driver(
+            db_session=db_session,
+            session_id=existing_result.session.id,
+            driver_id=existing_result.driver.id,
+        )
+
+        assert result.id == existing_result.id
+        assert result.position == existing_result.position
+        assert isinstance(result, entities.QualifyingDriverResult)
+
+    def test_returns_none_if_session_result_for_driver_does_not_exist(self, db_session):
+        driver = factories.Driver()
+        session = factories.Session()
+
+        result = queries.get_session_result_for_driver(
+            db_session=db_session,
+            session_id=session.id,
+            driver_id=driver.id,
+        )
+
+        assert result is None
+
+    @pytest.mark.parametrize(
+        "session_type",
+        [
+            session_entities.SessionType.PRACTICE_1.value,
+            session_entities.SessionType.PRACTICE_2.value,
+            session_entities.SessionType.PRACTICE_3.value,
+        ],
+    )
+    def test_raises_error_for_invalid_session_type(self, session_type, db_session):
+        existing_session_result = factories.DriverRaceResult()
+        existing_session_result.session.type = session_type
+
+        with pytest.raises(
+            queries.UnsupportedSessionTypeError,
+            match=f"Session type {session_type} is not supported for driver results.",
+        ):
+            queries.get_session_result_for_driver(
+                db_session=db_session,
+                session_id=existing_session_result.session.id,
+                driver_id=existing_session_result.driver.id,
+            )

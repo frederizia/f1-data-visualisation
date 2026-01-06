@@ -69,6 +69,8 @@ class Session(Base):
     type: Mapped[str] = mapped_column(nullable=False)
     date: Mapped[datetime.date] = mapped_column(nullable=False)
 
+    driver_results = relationship("DriverSessionResult", back_populates="session")
+
     def __repr__(self) -> str:
         return f"{self.type} - {self.date}"
 
@@ -92,6 +94,9 @@ class Driver(Base):
     # There are a few things which might change by season, so should be recorded with a temporal
     # relationship.
     seasons = relationship("DriverSeason", back_populates="driver")
+
+    # Results from any sessions the driver has participated in.
+    session_results = relationship("DriverSessionResult", back_populates="driver")
 
 
 class DriverSeason(Base):
@@ -133,3 +138,44 @@ class Constructor(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     name: Mapped[str] = mapped_column(nullable=False, unique=True)
+
+    # All session results for this constructor, for any driver running under this constructor.
+    session_results = relationship("DriverSessionResult", back_populates="constructor")
+
+
+class DriverSessionResult(Base):
+    """
+    Store information about a driver's result in a given session.
+
+    This only stores information which would be useful when analysing drivers season performance.
+    """
+
+    __tablename__ = "driver_session_results"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"), nullable=False)
+    driver = relationship("Driver", back_populates="session_results")
+
+    session_id: Mapped[int] = mapped_column(ForeignKey("sessions.id"), nullable=False)
+    session = relationship("Session", back_populates="driver_results")
+
+    constructor_id: Mapped[int] = mapped_column(ForeignKey("constructors.id"), nullable=False)
+    constructor = relationship("Constructor", back_populates="session_results")
+
+    position: Mapped[int] = mapped_column(nullable=True)
+    # Race specific information
+    # Whether a driver finished, retired, disqualified, etc.
+    classification_status: Mapped[str] = mapped_column(nullable=True)
+    time: Mapped[str] = mapped_column(nullable=True)
+    points: Mapped[float] = mapped_column(nullable=False, default=0.0)
+    grid_position: Mapped[int] = mapped_column(nullable=True)
+    laps_completed: Mapped[int] = mapped_column(nullable=True)
+
+    # Quali specific information
+    q1_time: Mapped[str] = mapped_column(nullable=True)
+    q2_time: Mapped[str] = mapped_column(nullable=True)
+    q3_time: Mapped[str] = mapped_column(nullable=True)
+
+    # There can only be a single driver session result entry for a given driver and session.
+    __table_args__ = (UniqueConstraint("driver_id", "session_id", name="uq_driver_session"),)

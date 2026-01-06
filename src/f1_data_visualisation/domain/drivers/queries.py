@@ -1,9 +1,16 @@
+import datetime
+
 import sqlalchemy
 from sqlalchemy import orm
 
 from f1_data_visualisation.data import models
 from f1_data_visualisation.domain.drivers import entities
 from f1_data_visualisation.domain.seasons import entities as season_entities
+from f1_data_visualisation.domain.sessions import entities as session_entities
+
+
+class UnsupportedSessionTypeError(Exception):
+    pass
 
 
 def get_driver_information_for_season(
@@ -130,4 +137,66 @@ def get_constructor(db_session: orm.Session, name: str) -> entities.Constructor 
     return entities.Constructor(
         id=constructor_model.id,
         name=constructor_model.name,
+    )
+
+
+def get_session_result_for_driver(
+    db_session: orm.Session,
+    driver_id: int,
+    session_id: int,
+) -> entities.RaceDriverResult | entities.QualifyingDriverResult | None:
+    """
+    Retrieve a driver session result for a given driver and session.
+
+    We only support qualifying and races as the other sessions do not have meaningful results.
+    """
+    query = sqlalchemy.select(models.DriverSessionResult).filter(
+        models.DriverSessionResult.driver_id == driver_id,
+        models.DriverSessionResult.session_id == session_id,
+    )
+    try:
+        result_model = db_session.execute(query).scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return None
+    if result_model.session.type in (
+        session_entities.SessionType.RACE.value,
+        session_entities.SessionType.SPRINT_RACE.value,
+    ):
+        return entities.RaceDriverResult(
+            id=result_model.id,
+            constructor=_get_constructor_from_result(result_model),
+            position=result_model.position,
+            laps_completed=result_model.laps_completed,
+            points=result_model.points,
+            status=entities.DriverSessionClassificationStatus(result_model.classification_status),
+            grid_position=result_model.grid_position,
+            time=datetime.time.fromisoformat(result_model.time) if result_model.time else None,
+        )
+    if result_model.session.type in (
+        session_entities.SessionType.QUALIFYING.value,
+        session_entities.SessionType.SPRINT_QUALIFYING,
+    ):
+        return entities.QualifyingDriverResult(
+            id=result_model.id,
+            constructor=_get_constructor_from_result(result_model),
+            position=result_model.position,
+            q1_time=datetime.time.fromisoformat(result_model.q1_time)
+            if result_model.q1_time
+            else None,
+            q2_time=datetime.time.fromisoformat(result_model.q2_time)
+            if result_model.q2_time
+            else None,
+            q3_time=datetime.time.fromisoformat(result_model.q3_time)
+            if result_model.q3_time
+            else None,
+        )
+    raise UnsupportedSessionTypeError(
+        f"Session type {result_model.session.type} is not supported for driver results."
+    )
+
+
+def _get_constructor_from_result(result_model: models.DriverSessionResult) -> entities.Constructor:
+    return entities.Constructor(
+        id=result_model.constructor.id,
+        name=result_model.constructor.name,
     )

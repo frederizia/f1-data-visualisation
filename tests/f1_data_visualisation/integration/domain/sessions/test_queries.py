@@ -120,6 +120,27 @@ class TestGetSessionsByTypeAndYear:
         assert sessions[0].type == entities.SessionType.PRACTICE_1
 
 
+class TestGetSessionById:
+    def test_returns_session_if_exists(self, db_session):
+        existing_session = factories.Session()
+
+        session_entity = queries.get_session_by_id(
+            db_session=db_session,
+            database_id=existing_session.id,
+        )
+
+        assert session_entity.id == existing_session.id
+        assert session_entity.type.value == existing_session.type
+
+    def test_returns_none_if_session_does_not_exist(self, db_session):
+        session_entity = queries.get_session_by_id(
+            db_session=db_session,
+            database_id=9999,
+        )
+
+        assert session_entity is None
+
+
 class TestIsSprintWeekend:
     @pytest.mark.parametrize(
         "session_type",
