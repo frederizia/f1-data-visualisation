@@ -40,7 +40,7 @@ repos:
       - id: pytest
         name: "Run tests with pytest"
         language: system
-        entry: "make test"
+        entry: "make test_from_fresh_db"
         require_serial: true
         pass_filenames: false
         types: [python]

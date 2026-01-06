@@ -27,6 +27,15 @@ test:
 	uv run pytest tests
 
 
+.PHONY: test_from_fresh_db
+test_from_fresh_db:
+    # We want to be able to run tests on a brand new database and we don't want to compromise our local one.
+	dropdb f1data-test --if-exists
+	createdb f1data-test
+	DATABASE_URL="postgresql://postgres@localhost/f1data-test" make run_db_migrations
+	DATABASE_URL="postgresql://postgres@localhost/f1data-test" uv run pytest tests
+
+
 .PHONY:import_linter
 import_linter:
 	uv run lint-imports

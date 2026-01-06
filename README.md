@@ -77,6 +77,11 @@ Tests can be run using
 ```shell
   make test
 ```
+or
+```shell
+  make test_from_fresh_db
+```
+which will create a fresh database for the tests.
 
 The import linter can be run using
 
