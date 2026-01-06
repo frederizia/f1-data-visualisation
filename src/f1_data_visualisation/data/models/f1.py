@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -17,6 +17,8 @@ class Season(Base):
     year: Mapped[int] = mapped_column()
 
     rounds = relationship("Round", back_populates="season")
+
+    drivers = relationship("DriverSeason", back_populates="season")
 
     def __repr__(self) -> str:
         return f"{self.year} season"
@@ -69,3 +71,51 @@ class Session(Base):
 
     def __repr__(self) -> str:
         return f"{self.type} - {self.date}"
+
+
+class Driver(Base):
+    """
+    Store information about a driver.
+    """
+
+    __tablename__ = "drivers"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    # Name information
+    first_name: Mapped[str] = mapped_column(nullable=False)
+    last_name: Mapped[str] = mapped_column(nullable=False)
+    # Even though in principle a display name is not unique, in practice it should be and we should have _something_
+    # as a unique identifier for drivers.
+    display_name: Mapped[str] = mapped_column(nullable=False, unique=True)
+
+    # There are a few things which might change by season, so should be recorded with a temporal
+    # relationship.
+    seasons = relationship("DriverSeason", back_populates="driver")
+
+
+class DriverSeason(Base):
+    """
+    Store driver information that might change between seasons.
+
+    Reasons are as follows:
+    * number: drivers might change number after winning a championship, i.e. taking the number one
+        (also in the past driver numbers were determined by championship standings of the constructors)
+    * short_code: this doesn't change often but it can happen, e.g. Max Verstapped changed from VES to VER
+    """
+
+    __tablename__ = "driver_seasons"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    number: Mapped[int] = mapped_column(nullable=False)
+    short_code: Mapped[str] = mapped_column(nullable=False)
+
+    driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"), nullable=False)
+    driver = relationship("Driver", back_populates="seasons")
+
+    season_id: Mapped[int] = mapped_column(ForeignKey("seasons.id"), nullable=False)
+    season = relationship("Season", back_populates="drivers")
+
+    # There can only be a single driver season entry for a given driver and season.
+    __table_args__ = (UniqueConstraint("driver_id", "season_id", name="uq_driver_season"),)

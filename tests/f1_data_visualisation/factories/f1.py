@@ -42,3 +42,30 @@ class Session(factory.alchemy.SQLAlchemyModelFactory):
     round = factory.SubFactory(Round)
     type = factory.LazyFunction(lambda: random.choice(list(SessionType)).value)
     date = factory.LazyFunction(lambda: datetime.datetime.now(datetime.UTC).date())
+
+
+class Driver(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.Driver
+        sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
+
+    id = factory.Sequence(lambda n: n + 1)
+
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+    display_name = factory.LazyAttribute(lambda o: o.first_name + o.last_name[:3])
+
+
+class DriverSeason(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.DriverSeason
+        sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
+
+    id = factory.Sequence(lambda n: n + 1)
+
+    number = factory.Sequence(lambda n: n + 1)
+    short_code = factory.LazyAttribute(lambda o: o.driver.last_name[:3].upper())
+
+    driver = factory.SubFactory(Driver)
+
+    season = factory.SubFactory(Season)
