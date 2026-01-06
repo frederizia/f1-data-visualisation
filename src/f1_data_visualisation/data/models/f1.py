@@ -119,3 +119,17 @@ class DriverSeason(Base):
 
     # There can only be a single driver season entry for a given driver and season.
     __table_args__ = (UniqueConstraint("driver_id", "season_id", name="uq_driver_season"),)
+
+
+class Constructor(Base):
+    """
+    Store information about a constructor.
+
+    In future, we might consider storing the different naming variations of constructors over time.
+    """
+
+    __tablename__ = "constructors"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    name: Mapped[str] = mapped_column(nullable=False, unique=True)

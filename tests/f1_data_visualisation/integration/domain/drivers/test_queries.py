@@ -94,3 +94,24 @@ class TestGetDriverById:
         )
 
         assert driver is None
+
+
+class TestGetConstructor:
+    def test_returns_constructor_if_exists(self, db_session):
+        existing_constructor = factories.Constructor()
+
+        constructor = queries.get_constructor(
+            db_session=db_session,
+            name=existing_constructor.name,
+        )
+
+        assert constructor.id == existing_constructor.id
+        assert constructor.name == existing_constructor.name
+
+    def test_returns_none_if_constructor_does_not_exist(self, db_session):
+        constructor = queries.get_constructor(
+            db_session=db_session,
+            name="Non Existent Constructor",
+        )
+
+        assert constructor is None

@@ -116,3 +116,18 @@ def get_driver_by_id(db_session: orm.Session, database_id: int) -> entities.Driv
         last_name=driver_model.last_name,
         display_name=driver_model.display_name,
     )
+
+
+def get_constructor(db_session: orm.Session, name: str) -> entities.Constructor | None:
+    """
+    Retrieve a constructor using the name as identifier.
+    """
+    query = sqlalchemy.select(models.Constructor).filter(models.Constructor.name == name)
+    try:
+        constructor_model = db_session.execute(query).scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return None
+    return entities.Constructor(
+        id=constructor_model.id,
+        name=constructor_model.name,
+    )

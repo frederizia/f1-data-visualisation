@@ -44,6 +44,16 @@ class Session(factory.alchemy.SQLAlchemyModelFactory):
     date = factory.LazyFunction(lambda: datetime.datetime.now(datetime.UTC).date())
 
 
+class Constructor(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = models.Constructor
+        sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
+
+    id = factory.Sequence(lambda n: n + 1)
+
+    name = factory.LazyAttribute(lambda o: f"{factory.Faker('last_name')} Racing")
+
+
 class Driver(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.Driver

@@ -101,3 +101,25 @@ class TestGetOrCreateDriver:
         assert driver.first_name == existing_driver.first_name
         assert driver.last_name == existing_driver.last_name
         assert driver.display_name == existing_driver.display_name
+
+
+class TestGetOrCreateConstructor:
+    def test_returns_existing_constructor_if_exists(self, db_session):
+        existing_constructor = factories.Constructor()
+
+        constructor = operations.get_or_create_constructor(
+            db_session=db_session,
+            name=existing_constructor.name,
+        )
+
+        assert constructor.id == existing_constructor.id
+        assert constructor.name == existing_constructor.name
+
+    def test_creates_new_constructor_if_not_exists(self, db_session):
+        constructor = operations.get_or_create_constructor(
+            db_session=db_session,
+            name="New Constructor",
+        )
+
+        assert constructor.id is not None
+        assert constructor.name == "New Constructor"

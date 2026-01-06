@@ -4,6 +4,12 @@ from f1_data_visualisation.domain.seasons import entities as season_entities
 
 
 @attrs.frozen
+class Constructor:
+    id: int
+    name: str
+
+
+@attrs.frozen
 class Driver:
     id: int
     first_name: str

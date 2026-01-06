@@ -35,6 +35,22 @@ def get_or_create_driver(
     )
 
 
+def get_or_create_constructor(db_session: orm.Session, name: str) -> entities.Constructor:
+    """
+    Create a new constructor entry in the database, if it doesn't exist yet.
+    """
+    existing_constructor = queries.get_constructor(db_session=db_session, name=name)
+    if existing_constructor:
+        return existing_constructor
+    constructor_model = models.Constructor(name=name)
+    db_session.add(constructor_model)
+    db_session.flush()
+    return entities.Constructor(
+        id=constructor_model.id,
+        name=constructor_model.name,
+    )
+
+
 def get_or_create_driver_season(
     db_session: orm.Session,
     driver_id: int,
