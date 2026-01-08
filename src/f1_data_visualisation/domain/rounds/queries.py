@@ -6,7 +6,7 @@ from f1_data_visualisation.domain.rounds import entities
 from f1_data_visualisation.domain.seasons import entities as season_entities
 
 
-def get_round(db_session: orm.Session, number: int, year: int) -> entities.Round | None:
+def get_round(db_session: orm.Session, number: int, year: int) -> entities.RoundWithSeason | None:
     """
     Retrieve a round for a year by its number.
     """
@@ -20,7 +20,7 @@ def get_round(db_session: orm.Session, number: int, year: int) -> entities.Round
     except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
         return None
     season = season_entities.Season(id=round_model.season.id, year=round_model.season.year)
-    return entities.Round(
+    return entities.RoundWithSeason(
         id=round_model.id,
         season=season,
         number=round_model.number,

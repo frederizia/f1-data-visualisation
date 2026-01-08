@@ -32,7 +32,7 @@ def get_session_by_type(
         session_model = db_session.execute(query).scalars().one()
     except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
         return None
-    round_entity = round_entities.Round(
+    round_entity = round_entities.RoundWithSeason(
         id=session_model.round.id,
         season=season_entities.Season(
             id=session_model.round.season.id, year=session_model.round.season.year
@@ -74,7 +74,7 @@ def get_sessions_by_type_and_year(
     return [
         entities.Session(
             id=session_model.id,
-            round=round_entities.Round(
+            round=round_entities.RoundWithSeason(
                 id=session_model.round.id,
                 season=season_entities.Season(
                     id=session_model.round.season.id,
@@ -103,7 +103,7 @@ def get_session_by_id(db_session: orm.Session, database_id: int) -> entities.Ses
         session_model = db_session.execute(query).scalars().one()
     except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
         return None
-    round_entity = round_entities.Round(
+    round_entity = round_entities.RoundWithSeason(
         id=session_model.round.id,
         season=season_entities.Season(
             id=session_model.round.season.id, year=session_model.round.season.year

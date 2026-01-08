@@ -21,7 +21,7 @@ def get_or_create_round(
     name: str,
     date_from: datetime.date,
     date_to: datetime.date,
-) -> entities.Round:
+) -> entities.RoundWithSeason:
     """
     Create a new round entry in the database, if it doesn't exist yet.
     """
@@ -43,7 +43,7 @@ def get_or_create_round(
     db_session.add(round_model)
     db_session.flush()
     season_entity = season_entities.Season(id=season.id, year=season.year)
-    return entities.Round(
+    return entities.RoundWithSeason(
         id=round_model.id,
         season=season_entity,
         number=round_model.number,
