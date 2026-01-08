@@ -22,3 +22,6 @@ __pycache__/
 
 # Local requirements files
 requirements/local.txt
+
+# FastF1 cache
+.fastf1_cache/
