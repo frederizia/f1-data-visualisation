@@ -18,7 +18,11 @@ class SessionType(enum.Enum):
 
 @attrs.frozen
 class Session:
-    id: int
-    round: round_entities.RoundWithSeason
     type: SessionType
     date: datetime.date
+
+
+@attrs.frozen
+class SessionWithRound(Session):
+    id: int
+    round: round_entities.RoundWithSeason

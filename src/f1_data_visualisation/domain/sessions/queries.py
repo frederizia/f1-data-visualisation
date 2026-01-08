@@ -12,7 +12,7 @@ def get_session_by_type(
     round_number: int,
     year: int,
     session_type: entities.SessionType,
-) -> entities.Session | None:
+) -> entities.SessionWithRound | None:
     """
     Retrieve a session by round, year, and type.
 
@@ -44,7 +44,7 @@ def get_session_by_type(
         date_from=session_model.round.date_from,
         date_to=session_model.round.date_to,
     )
-    return entities.Session(
+    return entities.SessionWithRound(
         id=session_model.id,
         round=round_entity,
         type=entities.SessionType(session_model.type),
@@ -56,7 +56,7 @@ def get_sessions_by_type_and_year(
     db_session: orm.Session,
     session_type: str,
     year: int,
-) -> list[entities.Session]:
+) -> list[entities.SessionWithRound]:
     """
     Retrieve all sessions of a given type for a given year.
     """
@@ -72,7 +72,7 @@ def get_sessions_by_type_and_year(
     )
     session_models = db_session.execute(query).scalars().all()
     return [
-        entities.Session(
+        entities.SessionWithRound(
             id=session_model.id,
             round=round_entities.RoundWithSeason(
                 id=session_model.round.id,
@@ -94,7 +94,9 @@ def get_sessions_by_type_and_year(
     ]
 
 
-def get_session_by_id(db_session: orm.Session, database_id: int) -> entities.Session | None:
+def get_session_by_id(
+    db_session: orm.Session, database_id: int
+) -> entities.SessionWithRound | None:
     """
     Retrieve a session using the database ID.
     """
@@ -115,7 +117,7 @@ def get_session_by_id(db_session: orm.Session, database_id: int) -> entities.Ses
         date_from=session_model.round.date_from,
         date_to=session_model.round.date_to,
     )
-    return entities.Session(
+    return entities.SessionWithRound(
         id=session_model.id,
         round=round_entity,
         type=entities.SessionType(session_model.type),

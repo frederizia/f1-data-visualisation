@@ -17,7 +17,7 @@ def get_or_create_session(
     year: int,
     session_type: entities.SessionType,
     date: datetime.date,
-) -> entities.Session:
+) -> entities.SessionWithRound:
     """
     Create a new session entry in the database, if it doesn't exist yet.
     """
@@ -44,7 +44,7 @@ def get_or_create_session(
     )
     db_session.add(session_model)
     db_session.flush()
-    return entities.Session(
+    return entities.SessionWithRound(
         id=session_model.id,
         round=round_entity,
         type=session_type,
