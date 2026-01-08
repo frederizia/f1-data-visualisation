@@ -18,13 +18,13 @@ class DriverSessionClassificationStatus(enum.Enum):
 
 @attrs.frozen
 class Constructor:
-    id: int
+    id: int | None
     name: str
 
 
 @attrs.frozen
 class Driver:
-    id: int
+    id: int | None
     first_name: str
     last_name: str
     display_name: str
@@ -32,7 +32,7 @@ class Driver:
 
 @attrs.frozen
 class DriverSeason:
-    id: int
+    id: int | None
     number: int
     short_code: str
 
@@ -55,13 +55,13 @@ class DriverWithSeasons(Driver):
 
 @attrs.frozen
 class BaseDriverSessionResult:
-    id: int
+    id: int | None
     constructor: Constructor
-    position: int
 
 
 @attrs.frozen
 class RaceDriverResult(BaseDriverSessionResult):
+    position: int
     laps_completed: int
     points: float
     status: DriverSessionClassificationStatus
@@ -71,6 +71,9 @@ class RaceDriverResult(BaseDriverSessionResult):
 
 @attrs.frozen
 class QualifyingDriverResult(BaseDriverSessionResult):
+    # Sometimes (rarely) no position is assigned, e.g. when a driver does not participate in
+    # qualifying.
+    position: int | None
     q1_time: datetime.timedelta | None
     q2_time: datetime.timedelta | None
     q3_time: datetime.timedelta | None

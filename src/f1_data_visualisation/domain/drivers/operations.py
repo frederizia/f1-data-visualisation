@@ -153,7 +153,7 @@ def get_or_create_qualifying_result(
     db_session: orm.Session,
     driver_id: int,
     session_id: int,
-    position: int,
+    position: int | None,
     constructor_name: str,
     q1_time: datetime.timedelta | None,
     q2_time: datetime.timedelta | None,

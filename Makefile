@@ -48,6 +48,12 @@ import_linter:
 .PHONY: dev
 dev: .env install_dependencies precommit
 
+
+.PHONY: run_python
+run_python:
+	uv run python
+
+
 # Database related commands
 .PHONY: run_db_migrations
 run_db_migrations:
