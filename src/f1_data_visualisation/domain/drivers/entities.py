@@ -66,11 +66,11 @@ class RaceDriverResult(BaseDriverSessionResult):
     points: float
     status: DriverSessionClassificationStatus
     grid_position: int
-    time: datetime.time | None
+    time: datetime.timedelta | None
 
 
 @attrs.frozen
 class QualifyingDriverResult(BaseDriverSessionResult):
-    q1_time: datetime.time | None
-    q2_time: datetime.time | None
-    q3_time: datetime.time | None
+    q1_time: datetime.timedelta | None
+    q2_time: datetime.timedelta | None
+    q3_time: datetime.timedelta | None

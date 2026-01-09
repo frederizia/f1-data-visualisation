@@ -141,7 +141,7 @@ class TestGetOrCreateRaceResult:
             points=25.0,
             status=entities.DriverSessionClassificationStatus.CLASSIFIED,
             grid_position=1,
-            time=datetime.time(hour=1, minute=30, second=15),
+            time=datetime.timedelta(hours=1, minutes=30, seconds=15),
         )
 
         assert race_result.id == existing_result.id
@@ -161,7 +161,7 @@ class TestGetOrCreateRaceResult:
             points=18.0,
             status=entities.DriverSessionClassificationStatus.CLASSIFIED,
             grid_position=2,
-            time=datetime.time(hour=1, minute=32, second=10),
+            time=datetime.timedelta(hours=1, minutes=32, seconds=10),
         )
 
         assert race_result.constructor.name == constructor_name
@@ -178,9 +178,9 @@ class TestGetOrCreateQualifyingResult:
             session_id=existing_result.session.id,
             constructor_name="Irrelevant",
             position=1,
-            q1_time=datetime.time(hour=0, minute=1, second=15),
-            q2_time=datetime.time(hour=0, minute=1, second=10),
-            q3_time=datetime.time(hour=0, minute=1, second=5),
+            q1_time=datetime.timedelta(hours=0, minutes=1, seconds=15),
+            q2_time=datetime.timedelta(hours=0, minutes=1, seconds=10),
+            q3_time=datetime.timedelta(hours=0, minutes=1, seconds=5),
         )
 
         assert qualifying_result.id == existing_result.id
@@ -196,9 +196,9 @@ class TestGetOrCreateQualifyingResult:
             session_id=session.id,
             constructor_name=constructor_name,
             position=3,
-            q1_time=datetime.time(hour=0, minute=1, second=20),
-            q2_time=datetime.time(hour=0, minute=1, second=15),
-            q3_time=datetime.time(hour=0, minute=1, second=10),
+            q1_time=datetime.timedelta(hours=0, minutes=1, seconds=20),
+            q2_time=datetime.timedelta(hours=0, minutes=1, seconds=15),
+            q3_time=datetime.timedelta(hours=0, minutes=1, seconds=10),
         )
 
         assert qualifying_result.constructor.name == constructor_name

@@ -108,7 +108,7 @@ def get_or_create_race_result(
     points: float,
     status: entities.DriverSessionClassificationStatus,
     grid_position: int,
-    time: datetime.time | None,
+    time: datetime.timedelta | None,
 ) -> entities.RaceDriverResult:
     """
     Create a new driver race result entry in the database, if it doesn't exist yet.
@@ -133,7 +133,7 @@ def get_or_create_race_result(
         points=points,
         classification_status=status.value,
         grid_position=grid_position,
-        time=time.isoformat() if time else None,
+        time=time.total_seconds() if time else None,
     )
     db_session.add(result_model)
     db_session.flush()
@@ -155,9 +155,9 @@ def get_or_create_qualifying_result(
     session_id: int,
     position: int,
     constructor_name: str,
-    q1_time: datetime.time | None,
-    q2_time: datetime.time | None,
-    q3_time: datetime.time | None,
+    q1_time: datetime.timedelta | None,
+    q2_time: datetime.timedelta | None,
+    q3_time: datetime.timedelta | None,
 ) -> entities.QualifyingDriverResult:
     """
     Create a new driver qualifying result entry in the database, if it doesn't exist yet.
@@ -178,9 +178,9 @@ def get_or_create_qualifying_result(
         session_id=session_id,
         constructor_id=constructor.id,
         position=position,
-        q1_time=q1_time.isoformat() if q1_time else None,
-        q2_time=q2_time.isoformat() if q2_time else None,
-        q3_time=q3_time.isoformat() if q3_time else None,
+        q1_time=q1_time.total_seconds() if q1_time else None,
+        q2_time=q2_time.total_seconds() if q2_time else None,
+        q3_time=q3_time.total_seconds() if q3_time else None,
     )
     db_session.add(result_model)
     db_session.flush()

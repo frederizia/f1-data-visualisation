@@ -101,12 +101,12 @@ class DriverRaceResult(factory.alchemy.SQLAlchemyModelFactory):
     )
     grid_position = factory.LazyFunction(lambda: random.randint(1, 20))
     time = factory.LazyFunction(
-        lambda: datetime.time(
-            hour=random.randint(0, 1),
-            minute=random.randint(0, 59),
-            second=random.randint(0, 59),
-            microsecond=random.randint(0, 999999),
-        ).isoformat()
+        lambda: datetime.timedelta(
+            hours=random.randint(0, 1),
+            minutes=random.randint(0, 59),
+            seconds=random.randint(0, 59),
+            microseconds=random.randint(0, 999999),
+        ).total_seconds()
     )
 
 
@@ -123,26 +123,26 @@ class DriverQualifyingResult(factory.alchemy.SQLAlchemyModelFactory):
 
     position = factory.LazyFunction(lambda: random.randint(1, 20))
     q1_time = factory.LazyFunction(
-        lambda: datetime.time(
-            hour=0,
-            minute=random.randint(0, 1),
-            second=random.randint(0, 59),
-            microsecond=random.randint(0, 999999),
-        ).isoformat()
+        lambda: datetime.timedelta(
+            hours=0,
+            minutes=random.randint(0, 1),
+            seconds=random.randint(0, 59),
+            microseconds=random.randint(0, 999999),
+        ).total_seconds()
     )
     q2_time = factory.LazyFunction(
-        lambda: datetime.time(
-            hour=0,
-            minute=random.randint(0, 1),
-            second=random.randint(0, 59),
-            microsecond=random.randint(0, 999999),
-        ).isoformat()
+        lambda: datetime.timedelta(
+            hours=0,
+            minutes=random.randint(0, 1),
+            seconds=random.randint(0, 59),
+            microseconds=random.randint(0, 999999),
+        ).total_seconds()
     )
     q3_time = factory.LazyFunction(
-        lambda: datetime.time(
-            hour=0,
-            minute=random.randint(0, 1),
-            second=random.randint(0, 59),
-            microsecond=random.randint(0, 999999),
-        ).isoformat()
+        lambda: datetime.timedelta(
+            hours=0,
+            minutes=random.randint(0, 1),
+            seconds=random.randint(0, 59),
+            microseconds=random.randint(0, 999999),
+        ).total_seconds()
     )

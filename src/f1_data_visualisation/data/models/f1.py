@@ -167,15 +167,16 @@ class DriverSessionResult(Base):
     # Race specific information
     # Whether a driver finished, retired, disqualified, etc.
     classification_status: Mapped[str] = mapped_column(nullable=True)
-    time: Mapped[str] = mapped_column(nullable=True)
+    # In seconds.
+    time: Mapped[float] = mapped_column(nullable=True)
     points: Mapped[float] = mapped_column(nullable=False, default=0.0)
     grid_position: Mapped[int] = mapped_column(nullable=True)
     laps_completed: Mapped[int] = mapped_column(nullable=True)
 
-    # Quali specific information
-    q1_time: Mapped[str] = mapped_column(nullable=True)
-    q2_time: Mapped[str] = mapped_column(nullable=True)
-    q3_time: Mapped[str] = mapped_column(nullable=True)
+    # Quali specific information (in seconds)
+    q1_time: Mapped[float] = mapped_column(nullable=True)
+    q2_time: Mapped[float] = mapped_column(nullable=True)
+    q3_time: Mapped[float] = mapped_column(nullable=True)
 
     # There can only be a single driver session result entry for a given driver and session.
     __table_args__ = (UniqueConstraint("driver_id", "session_id", name="uq_driver_session"),)

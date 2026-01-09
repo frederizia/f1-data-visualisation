@@ -170,7 +170,7 @@ def get_session_result_for_driver(
             points=result_model.points,
             status=entities.DriverSessionClassificationStatus(result_model.classification_status),
             grid_position=result_model.grid_position,
-            time=datetime.time.fromisoformat(result_model.time) if result_model.time else None,
+            time=datetime.timedelta(seconds=result_model.time) if result_model.time else None,
         )
     if result_model.session.type in (
         session_entities.SessionType.QUALIFYING.value,
@@ -180,13 +180,13 @@ def get_session_result_for_driver(
             id=result_model.id,
             constructor=_get_constructor_from_result(result_model),
             position=result_model.position,
-            q1_time=datetime.time.fromisoformat(result_model.q1_time)
+            q1_time=datetime.timedelta(seconds=result_model.q1_time)
             if result_model.q1_time
             else None,
-            q2_time=datetime.time.fromisoformat(result_model.q2_time)
+            q2_time=datetime.timedelta(seconds=result_model.q2_time)
             if result_model.q2_time
             else None,
-            q3_time=datetime.time.fromisoformat(result_model.q3_time)
+            q3_time=datetime.timedelta(seconds=result_model.q3_time)
             if result_model.q3_time
             else None,
         )
