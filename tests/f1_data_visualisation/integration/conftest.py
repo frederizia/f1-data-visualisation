@@ -1,18 +1,20 @@
 import inspect
+from contextlib import contextmanager
 
 import factory.alchemy
 import pytest
 import sqlalchemy
 from sqlalchemy import orm
 
-from f1_data_visualisation import config
 from f1_data_visualisation.data.models import Base
 from tests.f1_data_visualisation import factories
 
 
+TEST_DATABASE_URL = "postgresql://postgres@localhost/f1data-test"
+
 # Engine that is used for all tests.
 engine = sqlalchemy.create_engine(
-    url=config.DATABASE_URL,
+    url=TEST_DATABASE_URL,
     echo=False,
     poolclass=sqlalchemy.NullPool,
 )
@@ -56,4 +58,22 @@ def db_session(db_connection):
 
     yield session
 
+    session.expire_all()
     session.close()
+
+
+def _create_mock_get_session(db_session):
+    @contextmanager
+    def mock_get_session_impl():
+        try:
+            yield db_session
+        except Exception:
+            db_session.rollback()
+            raise
+
+    return mock_get_session_impl
+
+
+@pytest.fixture(scope="function")
+def mock_get_session(db_session):
+    return _create_mock_get_session(db_session)

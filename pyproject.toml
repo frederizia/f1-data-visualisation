@@ -176,6 +176,8 @@ containers = ["f1_data_visualisation"]
 layers = [
     # Entrypoint
     "main",
+    # Application layer
+    "application",
     # Domain layer
     "domain",
     # Data layer
