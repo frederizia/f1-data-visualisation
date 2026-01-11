@@ -49,6 +49,9 @@ class Round(Base):
 
     sessions = relationship("Session", back_populates="round")
 
+    # Round numbers are unique per season.
+    __table_args__ = (UniqueConstraint("number", "season_id", name="uq_number_season"),)
+
     def __repr__(self) -> str:
         return f"{self.name} {self.season.year} (Round {self.number})"
 
