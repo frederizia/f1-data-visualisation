@@ -79,8 +79,8 @@ class FastF1:
         """
         schedule: fastf1.events.EventSchedule = fastf1.get_event_schedule(year)
         rounds = []
-        for idx, round_info in schedule.iterrows():
-            if idx == 0:
+        for _, round_info in schedule.iterrows():
+            if round_info["RoundNumber"] == 0:
                 continue
             rounds.append(
                 round_entities.Round(

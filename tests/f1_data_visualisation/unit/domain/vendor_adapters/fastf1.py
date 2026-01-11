@@ -45,6 +45,35 @@ class TestFast1:
         assert first_round.date_from == datetime.date(2023, 3, 5)
         assert first_round.date_to == datetime.date(2023, 3, 7)
 
+    def test_testing_rounds_skipped_correctly(self):
+        fastf1_adapter = adapter.FastF1()
+        with mock.patch.object(
+            adapter.fastf1,
+            "get_event_schedule",
+        ) as mock_get_event_schedule:
+            mock_get_event_schedule.return_value = adapter.fastf1.events.EventSchedule(
+                data={
+                    "RoundNumber": [0, 0, 2],
+                    "Country": ["", "Bahrain", "Saudi Arabia"],
+                    "Location": ["", "Sakhir", "Jeddah"],
+                    "EventName": ["", "Bahrain Grand Prix", "Saudi Arabian Grand Prix"],
+                    "Session1Date": [
+                        pd.NaT,
+                        pd.Timestamp("2023-03-05 15:00:00"),
+                        pd.Timestamp("2023-03-19 15:00:00"),
+                    ],
+                    "Session5Date": [
+                        pd.NaT,
+                        pd.Timestamp("2023-03-07 15:00:00"),
+                        pd.Timestamp("2023-04-02 15:00:00"),
+                    ],
+                }
+            )
+            rounds = fastf1_adapter.get_all_rounds_for_season(2023)
+
+        # All rounds with RoundNumber 0 should be skipped.
+        assert len(rounds) == 1
+
     @pytest.mark.parametrize(
         ("classified_position", "expected_status"),
         [
