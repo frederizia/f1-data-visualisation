@@ -111,7 +111,15 @@ For example, to create a new migration:
   make build_migration MESSAGE="Add users table"
 ```
 
+## Application
 
+Fill your database by running
+```shell
+  uv run inv download.season-results --year <year>
+```
+
+which will download all season results for the given year, or the remaining ones if
+some already exist.
 
 -----
 
