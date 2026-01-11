@@ -17,6 +17,7 @@ from f1_data_visualisation.domain.sessions import (
     queries as session_queries,
 )
 from f1_data_visualisation.domain.vendor_adapters import fastf1
+from f1_data_visualisation.utils import event_types, logs
 
 
 class UnableToStoreResultsError(Exception):
@@ -33,6 +34,10 @@ def download_all_results_for_season(year: int) -> None:
     We catch some errors which are _highly_ unlikely to occur as we're just making sure all the required objects exist
     but it's good practice.
     """
+    logs.log_event(
+        event_type=event_types.DOWNLOAD_RESULTS_FOR_SEASON_STARTED,
+        year=year,
+    )
     fastf1_adapter = fastf1.FastF1()
     with database.get_session() as db_session:
         # Store the season.
@@ -58,6 +63,11 @@ def download_all_results_for_season(year: int) -> None:
                     db_session=db_session, year=year, round_number=round_info.number
                 )
                 if has_sessions:
+                    logs.log_event(
+                        event_type=event_types.DOWNLOAD_ROUND_SKIPPED,
+                        year=year,
+                        round_number=round_info.number,
+                    )
                     continue
             # We only get quali and race results.
             sessions = fastf1_adapter.get_competitive_sessions_for_round(
@@ -70,8 +80,17 @@ def download_all_results_for_season(year: int) -> None:
                     session_summary=session_summary,
                     year=year,
                 )
+            logs.log_event(
+                event_type=event_types.DOWNLOAD_ROUND_COMPLETED,
+                year=year,
+                round_number=round_info.number,
+            )
         # Finally, commit the data.
         db_session.commit()
+        logs.log_event(
+            event_type=event_types.DOWNLOAD_RESULTS_FOR_SEASON_COMPLETED,
+            year=year,
+        )
 
 
 def _store_session_data_and_results(

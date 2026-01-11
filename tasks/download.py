@@ -1,6 +1,7 @@
 import invoke
 
 from f1_data_visualisation.application import download
+from f1_data_visualisation.utils import logs
 
 
 @invoke.task(help={"year": "The season year to download results for."})
@@ -14,6 +15,8 @@ def season_results(
     try:
         download.download_all_results_for_season(int(year))
     except Exception as e:
+        error_message = f"{e} ({type(e).__name__})"
+        logs.error(error_message)
         raise invoke.Exit(
-            f"⚠️ Failed to download results for season {year}: {e} ({type(e).__name__})"
+            f"⚠️ Failed to download results for season {year}: {error_message}"
         ) from e
