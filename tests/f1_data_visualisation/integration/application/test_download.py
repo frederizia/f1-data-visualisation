@@ -1,3 +1,4 @@
+import datetime
 from unittest import mock
 
 import pytest
@@ -5,6 +6,7 @@ import sqlalchemy
 
 from f1_data_visualisation.application import download
 from f1_data_visualisation.data import models
+from tests.f1_data_visualisation import factories
 from tests.f1_data_visualisation.stubs import fastf1 as fastf1_stubs
 
 
@@ -59,3 +61,43 @@ class TestDownloadAllResultsForSeason:
         assert len(seasons) == 0
         rounds = db_session.execute(sqlalchemy.select(models.Round)).scalars().all()
         assert len(rounds) == 0
+
+    def test_skips_existing_rounds(self, db_session, mock_get_session):
+        # Pre-create a season and round to simulate existing data.
+        existing_round = factories.Round(
+            number=1,
+            country="Australia",
+            location="Melbourne",
+            name="Australian Grand Prix",
+            date_from=datetime.date(2025, 3, 14),
+            date_to=datetime.date(2025, 3, 16),
+            season__year=2025,
+        )
+        existing_session = factories.Session(round=existing_round)
+
+        # To make the mocking a little easier, we just mock the whole fastf1 adapter.
+        with mock.patch.object(download.fastf1, "FastF1") as fastf1_adapter_mock:
+            fastf1_adapter_mock.return_value = fastf1_stubs.FakeSuccessfulFastF1()
+            # We also need to make sure the right DB session is used in the test.
+            with mock.patch(
+                "f1_data_visualisation.data.database.get_session", side_effect=mock_get_session
+            ):
+                download.download_all_results_for_season(2025)
+
+        # We should still have only 1 season and 1 round, as the existing round should be skipped.
+        seasons = db_session.execute(sqlalchemy.select(models.Season)).scalars().all()
+        assert len(seasons) == 1
+
+        rounds = db_session.execute(sqlalchemy.select(models.Round)).scalars().all()
+        assert len(rounds) == 1
+
+        # We won't have retrieved the sessions and drivers, so we should only have the pre-existing session.
+        sessions = db_session.execute(sqlalchemy.select(models.Session)).scalars().all()
+        assert len(sessions) == 1
+        assert sessions[0].id == existing_session.id
+
+        drivers = db_session.execute(sqlalchemy.select(models.Driver)).scalars().all()
+        assert len(drivers) == 0
+
+        results = db_session.execute(sqlalchemy.select(models.DriverSessionResult)).scalars().all()
+        assert len(results) == 0

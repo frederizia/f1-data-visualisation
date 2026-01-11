@@ -10,7 +10,12 @@ from f1_data_visualisation.domain.drivers import (
 from f1_data_visualisation.domain.rounds import entities as round_entities
 from f1_data_visualisation.domain.rounds import operations as round_operations
 from f1_data_visualisation.domain.seasons import operations as season_operations
-from f1_data_visualisation.domain.sessions import operations as session_operations
+from f1_data_visualisation.domain.sessions import (
+    operations as session_operations,
+)
+from f1_data_visualisation.domain.sessions import (
+    queries as session_queries,
+)
 from f1_data_visualisation.domain.vendor_adapters import fastf1
 
 
@@ -37,7 +42,7 @@ def download_all_results_for_season(year: int) -> None:
 
         for round_info in rounds:
             # Store the round.
-            round_object, _ = round_operations.get_or_create_round(
+            round_object, round_created = round_operations.get_or_create_round(
                 db_session=db_session,
                 year=year,
                 number=round_info.number,
@@ -47,6 +52,13 @@ def download_all_results_for_season(year: int) -> None:
                 date_from=round_info.date_from,
                 date_to=round_info.date_to,
             )
+            if not round_created:
+                # We already have the round, let's check if we have any sessions stored. If we do, skip.
+                has_sessions = session_queries.has_sessions(
+                    db_session=db_session, year=year, round_number=round_info.number
+                )
+                if has_sessions:
+                    continue
             # We only get quali and race results.
             sessions = fastf1_adapter.get_competitive_sessions_for_round(
                 year=year, round_number=round_info.number
