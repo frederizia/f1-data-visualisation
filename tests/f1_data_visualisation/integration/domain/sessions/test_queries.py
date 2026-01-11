@@ -179,3 +179,46 @@ class TestIsSprintWeekend:
             db_session=db_session, year=year, round_number=round_number
         )
         assert not is_sprint
+
+
+class TestHasSessions:
+    def test_returns_true_if_sessions_exist(self, db_session):
+        year = 2024
+        round_number = 5
+        round_model = factories.Round(
+            number=round_number,
+            season__year=year,
+        )
+        # Create two sessions.
+        factories.Session(round=round_model)
+        factories.Session(
+            round=round_model,
+        )
+
+        has_sessions = queries.has_sessions(
+            db_session=db_session, year=year, round_number=round_number
+        )
+        assert has_sessions
+
+    def test_returns_false_if_no_sessions_exist(self, db_session):
+        year = 2024
+        round_number = 5
+        # Create a round without sessions.
+        factories.Round(
+            number=round_number,
+            season__year=year,
+        )
+
+        has_sessions = queries.has_sessions(
+            db_session=db_session, year=year, round_number=round_number
+        )
+        assert not has_sessions
+
+    def test_returns_false_if_round_does_not_exist(self, db_session):
+        year = 2024
+        round_number = 5
+
+        has_sessions = queries.has_sessions(
+            db_session=db_session, year=year, round_number=round_number
+        )
+        assert not has_sessions

@@ -154,3 +154,28 @@ def is_sprint_weekend(
         ):
             return True
     return False
+
+
+def has_sessions(
+    db_session: orm.Session,
+    year: int,
+    round_number: int,
+) -> bool:
+    """
+    Determine if the given round has any sessions stored.
+    """
+    query = (
+        sqlalchemy.select(models.Round)
+        .join(models.Season)
+        .join(models.Session)
+        .filter(
+            models.Season.year == year,
+            models.Round.number == round_number,
+        )
+    )
+
+    try:
+        round_model = db_session.execute(query).unique().scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return False
+    return len(round_model.sessions) > 0
