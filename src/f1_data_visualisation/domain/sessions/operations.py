@@ -17,9 +17,11 @@ def get_or_create_session(
     year: int,
     session_type: entities.SessionType,
     date: datetime.date,
-) -> entities.SessionWithRound:
+) -> tuple[entities.SessionWithRound, bool]:
     """
     Create a new session entry in the database, if it doesn't exist yet.
+
+    Returns whether the session was created or already existed.
     """
     round_entity = round_queries.get_round(
         db_session=db_session,
@@ -36,7 +38,7 @@ def get_or_create_session(
         session_type=session_type,
     )
     if existing_session:
-        return existing_session
+        return existing_session, False
     session_model = models.Session(
         round_id=round_entity.id,
         type=session_type.value,
@@ -49,4 +51,4 @@ def get_or_create_session(
         round=round_entity,
         type=session_type,
         date=session_model.date,
-    )
+    ), True

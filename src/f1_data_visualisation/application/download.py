@@ -37,7 +37,7 @@ def download_all_results_for_season(year: int) -> None:
 
         for round_info in rounds:
             # Store the round.
-            round_object = round_operations.get_or_create_round(
+            round_object, _ = round_operations.get_or_create_round(
                 db_session=db_session,
                 year=year,
                 number=round_info.number,
@@ -74,7 +74,7 @@ def _store_session_data_and_results(
     This includes the session itself, results for all drivers, and additional driver information.
     """
     session_info = session_summary.session
-    session = session_operations.get_or_create_session(
+    session, _ = session_operations.get_or_create_session(
         db_session=db_session,
         round_number=round_object.number,
         year=year,
@@ -86,7 +86,7 @@ def _store_session_data_and_results(
         driver_info = driver_summary.driver
         driver_season_info = driver_summary.driver_season
         driver_result_info = driver_summary.result
-        driver = driver_operations.get_or_create_driver(
+        driver, _ = driver_operations.get_or_create_driver(
             db_session=db_session,
             first_name=driver_info.first_name,
             last_name=driver_info.last_name,

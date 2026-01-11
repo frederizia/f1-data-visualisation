@@ -10,7 +10,7 @@ class TestGetOrCreateSession:
         date = datetime.date(2023, 5, 25)
         session_type = entities.SessionType.PRACTICE_1
 
-        session_entity = operations.get_or_create_session(
+        session_entity, created = operations.get_or_create_session(
             db_session=db_session,
             round_number=round_model.number,
             year=round_model.season.year,
@@ -18,6 +18,7 @@ class TestGetOrCreateSession:
             date=date,
         )
 
+        assert created
         assert session_entity.type == session_type
         assert session_entity.date == date
         assert session_entity.round.number == round_model.number
@@ -26,7 +27,7 @@ class TestGetOrCreateSession:
         date = datetime.date(2023, 5, 25)
         existing_session = factories.Session(date=date)
 
-        session_entity = operations.get_or_create_session(
+        session_entity, created = operations.get_or_create_session(
             db_session=db_session,
             round_number=existing_session.round.number,
             year=existing_session.round.season.year,
@@ -34,4 +35,5 @@ class TestGetOrCreateSession:
             date=date,
         )
 
+        assert not created
         assert session_entity.id == existing_session.id

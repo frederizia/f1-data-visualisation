@@ -18,15 +18,17 @@ class UnableToCreateDriverResultError(Exception):
 
 def get_or_create_driver(
     db_session: orm.Session, first_name: str, last_name: str, display_name: str
-) -> entities.Driver:
+) -> tuple[entities.Driver, bool]:
     """
     Create a new driver entry in the database, if it doesn't exist yet.
 
     This does not create any information about a season.
+
+    Returns whether the driver was created or already existed.
     """
     existing_driver = queries.get_driver(db_session=db_session, display_name=display_name)
     if existing_driver:
-        return existing_driver
+        return existing_driver, False
     driver_model = models.Driver(
         first_name=first_name,
         last_name=last_name,
@@ -39,23 +41,27 @@ def get_or_create_driver(
         first_name=driver_model.first_name,
         last_name=driver_model.last_name,
         display_name=driver_model.display_name,
-    )
+    ), True
 
 
-def get_or_create_constructor(db_session: orm.Session, name: str) -> entities.Constructor:
+def get_or_create_constructor(
+    db_session: orm.Session, name: str
+) -> tuple[entities.Constructor, bool]:
     """
     Create a new constructor entry in the database, if it doesn't exist yet.
+
+    Returns whether the constructor was created or already existed.
     """
     existing_constructor = queries.get_constructor(db_session=db_session, name=name)
     if existing_constructor:
-        return existing_constructor
+        return existing_constructor, False
     constructor_model = models.Constructor(name=name)
     db_session.add(constructor_model)
     db_session.flush()
     return entities.Constructor(
         id=constructor_model.id,
         name=constructor_model.name,
-    )
+    ), True
 
 
 def get_or_create_driver_season(
@@ -64,9 +70,11 @@ def get_or_create_driver_season(
     number: int,
     short_code: str,
     year: int,
-) -> entities.DriverSeasonWithDriverAndSeason:
+) -> tuple[entities.DriverSeasonWithDriverAndSeason, bool]:
     """
     Create a new driver season entry in the database, if it doesn't exist yet.
+
+    Returns whether the driver season was created or already existed.
     """
     existing_driver_season = queries.get_driver_information_for_season(
         db_session=db_session,
@@ -74,7 +82,7 @@ def get_or_create_driver_season(
         year=year,
     )
     if existing_driver_season:
-        return existing_driver_season
+        return existing_driver_season, False
     driver = queries.get_driver_by_id(db_session=db_session, database_id=driver_id)
     if not driver:
         raise UnableToCreateDriverSeasonError(f"Driver matching ID {driver_id} does not exist.")
@@ -95,7 +103,7 @@ def get_or_create_driver_season(
         short_code=driver_season_model.short_code,
         driver=driver,
         season=season,
-    )
+    ), True
 
 
 def get_or_create_race_result(
@@ -109,21 +117,23 @@ def get_or_create_race_result(
     status: entities.DriverSessionClassificationStatus,
     grid_position: int,
     time: datetime.timedelta | None,
-) -> entities.RaceDriverResult:
+) -> tuple[entities.RaceDriverResult, bool]:
     """
     Create a new driver race result entry in the database, if it doesn't exist yet.
+
+    Returns whether the race result was created or already existed.
     """
     existing_result = queries.get_session_result_for_driver(
         db_session=db_session, driver_id=driver_id, session_id=session_id
     )
     if existing_result:
         assert isinstance(existing_result, entities.RaceDriverResult)
-        return existing_result
+        return existing_result, False
     if not queries.get_driver_by_id(db_session=db_session, database_id=driver_id):
         raise UnableToCreateDriverResultError(f"Driver matching ID {driver_id} does not exist.")
     if not session_queries.get_session_by_id(db_session=db_session, database_id=session_id):
         raise UnableToCreateDriverResultError(f"Session matching ID {session_id} does not exist.")
-    constructor = get_or_create_constructor(db_session=db_session, name=constructor_name)
+    constructor, _ = get_or_create_constructor(db_session=db_session, name=constructor_name)
     result_model = models.DriverSessionResult(
         driver_id=driver_id,
         session_id=session_id,
@@ -146,7 +156,7 @@ def get_or_create_race_result(
         status=status,
         grid_position=result_model.grid_position,
         time=time,
-    )
+    ), True
 
 
 def get_or_create_qualifying_result(
@@ -158,21 +168,23 @@ def get_or_create_qualifying_result(
     q1_time: datetime.timedelta | None,
     q2_time: datetime.timedelta | None,
     q3_time: datetime.timedelta | None,
-) -> entities.QualifyingDriverResult:
+) -> tuple[entities.QualifyingDriverResult, bool]:
     """
     Create a new driver qualifying result entry in the database, if it doesn't exist yet.
+
+    Returns whether the qualifying result was created or already existed.
     """
     existing_result = queries.get_session_result_for_driver(
         db_session=db_session, driver_id=driver_id, session_id=session_id
     )
     if existing_result:
         assert isinstance(existing_result, entities.QualifyingDriverResult)
-        return existing_result
+        return existing_result, False
     if not queries.get_driver_by_id(db_session=db_session, database_id=driver_id):
         raise UnableToCreateDriverResultError(f"Driver matching ID {driver_id} does not exist.")
     if not session_queries.get_session_by_id(db_session=db_session, database_id=session_id):
         raise UnableToCreateDriverResultError(f"Session matching ID {session_id} does not exist.")
-    constructor = get_or_create_constructor(db_session=db_session, name=constructor_name)
+    constructor, _ = get_or_create_constructor(db_session=db_session, name=constructor_name)
     result_model = models.DriverSessionResult(
         driver_id=driver_id,
         session_id=session_id,
@@ -191,4 +203,4 @@ def get_or_create_qualifying_result(
         q1_time=q1_time,
         q2_time=q2_time,
         q3_time=q3_time,
-    )
+    ), True

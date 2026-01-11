@@ -14,7 +14,7 @@ class TestGetOrCreateRound:
         date_from = datetime.date(2023, 5, 25)
         date_to = datetime.date(2023, 5, 28)
 
-        round_entity = operations.get_or_create_round(
+        round_entity, created = operations.get_or_create_round(
             db_session=db_session,
             year=year,
             number=number,
@@ -25,6 +25,7 @@ class TestGetOrCreateRound:
             date_to=date_to,
         )
 
+        assert created
         assert round_entity.number == number
         assert round_entity.country == country
         assert round_entity.location == location
@@ -41,7 +42,7 @@ class TestGetOrCreateRound:
             season__year=year,
         )
 
-        round_entity = operations.get_or_create_round(
+        round_entity, created = operations.get_or_create_round(
             db_session=db_session,
             year=year,
             number=number,
@@ -52,4 +53,5 @@ class TestGetOrCreateRound:
             date_to=datetime.datetime.now(datetime.UTC).date(),
         )
 
+        assert not created
         assert round_entity.id == existing_round.id

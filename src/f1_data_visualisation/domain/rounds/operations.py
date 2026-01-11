@@ -21,14 +21,16 @@ def get_or_create_round(
     name: str,
     date_from: datetime.date,
     date_to: datetime.date,
-) -> entities.RoundWithSeason:
+) -> tuple[entities.RoundWithSeason, bool]:
     """
     Create a new round entry in the database, if it doesn't exist yet.
+
+    Returns whether the round was created or already existed.
     """
     existing_round = queries.get_round(db_session=db_session, year=year, number=number)
     if existing_round:
-        return existing_round
-    season = season_operations.get_or_create_season(db_session=db_session, year=year)
+        return existing_round, False
+    season, _ = season_operations.get_or_create_season(db_session=db_session, year=year)
     # TODO: maybe check if there are any field mismatches with existing data.
     #   At the moment we can assume we would only create each round once when we know the data is complete.
     round_model = models.Round(
@@ -52,4 +54,4 @@ def get_or_create_round(
         name=round_model.name,
         date_from=round_model.date_from,
         date_to=round_model.date_to,
-    )
+    ), True
