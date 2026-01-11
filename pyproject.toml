@@ -26,6 +26,7 @@ dependencies = [
     "invoke>=2.2.1",
     "psycopg2>=2.9.11",
     "sqlalchemy>=2.0.45",
+    "structlog>=25.5.0",
 ]
 
 [dependency-groups]
