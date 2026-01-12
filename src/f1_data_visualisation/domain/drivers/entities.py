@@ -57,11 +57,13 @@ class DriverWithSeasons(Driver):
 class BaseDriverSessionResult:
     id: int | None
     constructor: Constructor
+    # Sometimes (rarely) no position is assigned, e.g. when a driver does not participate in
+    # qualifying or the race.
+    position: int | None
 
 
 @attrs.frozen
 class RaceDriverResult(BaseDriverSessionResult):
-    position: int
     laps_completed: int
     points: float
     status: DriverSessionClassificationStatus
@@ -71,9 +73,6 @@ class RaceDriverResult(BaseDriverSessionResult):
 
 @attrs.frozen
 class QualifyingDriverResult(BaseDriverSessionResult):
-    # Sometimes (rarely) no position is assigned, e.g. when a driver does not participate in
-    # qualifying.
-    position: int | None
     q1_time: datetime.timedelta | None
     q2_time: datetime.timedelta | None
     q3_time: datetime.timedelta | None

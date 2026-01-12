@@ -133,6 +133,11 @@ class FastF1:
                     number=driver_number,
                     short_code=driver_session_result["Abbreviation"],
                 )
+                position = (
+                    int(driver_session_result["Position"])
+                    if pd.notna(driver_session_result["Position"])
+                    else None
+                )
                 if session_type in QUALIFYING_SESSION_TYPES:
                     parsed_driver_session_result = driver_entities.QualifyingDriverResult(
                         id=None,
@@ -141,9 +146,7 @@ class FastF1:
                             name=driver_session_result["TeamName"],
                         ),
                         # The position is returned as a float for some reason.
-                        position=int(driver_session_result["Position"])
-                        if pd.notna(driver_session_result["Position"])
-                        else None,
+                        position=position,
                         q1_time=driver_session_result["Q1"].to_pytimedelta()
                         if pd.notna(driver_session_result["Q1"])
                         else None,
@@ -161,7 +164,7 @@ class FastF1:
                             id=None,
                             name=driver_session_result["TeamName"],
                         ),
-                        position=int(driver_session_result["Position"]),
+                        position=position,
                         # Laps are returned as a float.
                         laps_completed=int(driver_session_result["Laps"]),
                         # This is a numpy.float64 so needs to converted to an inbuilt float.

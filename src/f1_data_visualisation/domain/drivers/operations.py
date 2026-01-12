@@ -110,7 +110,7 @@ def get_or_create_race_result(
     db_session: orm.Session,
     driver_id: int,
     session_id: int,
-    position: int,
+    position: int | None,
     constructor_name: str,
     laps_completed: int,
     points: float,
