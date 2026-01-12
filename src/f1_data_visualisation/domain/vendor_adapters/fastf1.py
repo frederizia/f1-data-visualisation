@@ -158,6 +158,11 @@ class FastF1:
                         else None,
                     )
                 else:
+                    grid_position = (
+                        int(driver_session_result["GridPosition"])
+                        if pd.notna(driver_session_result["GridPosition"])
+                        else None
+                    )
                     parsed_driver_session_result = driver_entities.RaceDriverResult(
                         id=None,
                         constructor=driver_entities.Constructor(
@@ -172,7 +177,7 @@ class FastF1:
                         status=self._derive_classification_status(
                             driver_session_result["ClassifiedPosition"]
                         ),
-                        grid_position=int(driver_session_result["GridPosition"]),
+                        grid_position=grid_position,
                         time=(
                             driver_session_result["Time"].to_pytimedelta()
                             if pd.notna(driver_session_result["Time"])

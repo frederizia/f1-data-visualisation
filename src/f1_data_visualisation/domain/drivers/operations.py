@@ -115,7 +115,7 @@ def get_or_create_race_result(
     laps_completed: int,
     points: float,
     status: entities.DriverSessionClassificationStatus,
-    grid_position: int,
+    grid_position: int | None,
     time: datetime.timedelta | None,
 ) -> tuple[entities.RaceDriverResult, bool]:
     """

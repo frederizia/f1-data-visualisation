@@ -67,7 +67,7 @@ class RaceDriverResult(BaseDriverSessionResult):
     laps_completed: int
     points: float
     status: DriverSessionClassificationStatus
-    grid_position: int
+    grid_position: int | None
     time: datetime.timedelta | None
 
 
