@@ -4,6 +4,7 @@ import enum
 import attrs
 
 from f1_data_visualisation.domain.seasons import entities as season_entities
+from f1_data_visualisation.domain.sessions import entities as session_entities
 
 
 class DriverSessionClassificationStatus(enum.Enum):
@@ -69,6 +70,11 @@ class RaceDriverResult(BaseDriverSessionResult):
     status: DriverSessionClassificationStatus
     grid_position: int | None
     time: datetime.timedelta | None
+
+
+@attrs.frozen
+class RaceDriverResultWithSession(RaceDriverResult):
+    session: session_entities.SessionWithRound
 
 
 @attrs.frozen

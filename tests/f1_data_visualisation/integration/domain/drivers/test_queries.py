@@ -180,3 +180,63 @@ class TestGetSessionResultForDriver:
                 session_id=existing_session_result.session.id,
                 driver_id=existing_session_result.driver.id,
             )
+
+
+class TestGetDriverRaceResultsForSeason:
+    def test_returns_all_race_results(self, db_session):
+        driver = factories.Driver()
+        season = factories.Season()
+        for i in range(3):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+            )
+
+        race_results = queries.get_driver_race_results_for_season(
+            db_session=db_session, year=season.year, driver_id=driver.id
+        )
+
+        assert len(race_results) == 3
+
+    def test_irrelevant_results_are_excluded(self, db_session):
+        driver = factories.Driver()
+        other_driver = factories.Driver()
+        season = factories.Season(year=2022)
+        other_season = factories.Season(year=2021)
+
+        # Relevant results.
+        for i in range(2):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+            )
+
+        # Irrelevant results:
+        # Results for right season but different driver.
+        factories.DriverRaceResult(
+            driver=other_driver,
+            session__round__season=season,
+        )
+        # Results for right driver but different season.
+        factories.DriverRaceResult(
+            driver=driver,
+            session__round__season=other_season,
+        )
+        # Result for wrong driver and wrong season.
+        factories.DriverRaceResult(
+            driver=other_driver,
+            session__round__season=other_season,
+        )
+        # Quali session result for right driver and season.
+        factories.DriverQualifyingResult(
+            driver=driver,
+            session__round__season=season,
+        )
+
+        race_results = queries.get_driver_race_results_for_season(
+            db_session=db_session, year=season.year, driver_id=driver.id
+        )
+
+        assert len(race_results) == 2
