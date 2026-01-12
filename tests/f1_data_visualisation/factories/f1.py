@@ -2,10 +2,14 @@ import datetime
 import random
 
 import factory
+from faker import Faker
 
 from f1_data_visualisation.data import models
 from f1_data_visualisation.domain.drivers.entities import DriverSessionClassificationStatus
 from f1_data_visualisation.domain.sessions.entities import SessionType
+
+
+fake = Faker()
 
 
 class Season(factory.alchemy.SQLAlchemyModelFactory):
@@ -52,7 +56,7 @@ class Constructor(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Sequence(lambda n: n + 1)
 
-    name = factory.LazyAttribute(lambda o: f"{factory.Faker('last_name')} Racing")
+    name = factory.Sequence(lambda n: f"{fake.last_name()} {n} Racing")
 
 
 class Driver(factory.alchemy.SQLAlchemyModelFactory):
