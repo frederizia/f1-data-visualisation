@@ -1,7 +1,16 @@
 import attrs
 from sqlalchemy import orm
 
-from f1_data_visualisation.domain.drivers import queries as driver_queries
+from f1_data_visualisation.domain.drivers import (
+    entities as driver_entities,
+)
+from f1_data_visualisation.domain.drivers import (
+    queries as driver_queries,
+)
+
+
+class CannotCalculatePointsForSeasonError(Exception):
+    pass
 
 
 @attrs.frozen
@@ -38,3 +47,46 @@ def get_accumulative_points_per_round_for_driver(
             )
         )
     return accumulative_points_per_round
+
+
+@attrs.frozen
+class DriverSeasonPoints:
+    year: int
+    points_per_round: list[AccumulativePointsPerRound]
+    total_points: float
+
+
+@attrs.frozen
+class DriverPointsPerSeason:
+    driver: driver_entities.Driver
+    seasons: list[DriverSeasonPoints]
+    total_points: float
+
+
+def get_total_points_for_driver_across_seasons(
+    db_session: orm.Session, driver_id: int, years: list[int]
+) -> DriverPointsPerSeason:
+    """
+    Get the total points for a driver across multiple seasons.
+    """
+    driver = driver_queries.get_driver_by_id(db_session=db_session, database_id=driver_id)
+    if not driver:
+        raise CannotCalculatePointsForSeasonError("Driver {driver_id} not found.")
+    total_points = 0.0
+    season_points_summary: list[DriverSeasonPoints] = []
+    for year in years:
+        driver_results = get_accumulative_points_per_round_for_driver(
+            db_session=db_session, driver_id=driver_id, year=year
+        )
+        season_points = sum(result.points for result in driver_results)
+        total_points += season_points
+        season_points_summary.append(
+            DriverSeasonPoints(
+                year=year,
+                points_per_round=driver_results,
+                total_points=season_points,
+            )
+        )
+    return DriverPointsPerSeason(
+        driver=driver, seasons=season_points_summary, total_points=total_points
+    )
