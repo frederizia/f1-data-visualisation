@@ -44,3 +44,26 @@ class TestGetRound:
         )
 
         assert round_entity is None
+
+
+class TestGetRoundsForSeason:
+    def test_returns_rounds_in_order_for_season(self, db_session):
+        year = 2020
+        # Create rounds out of order.
+        round_2 = factories.Round(number=2, season__year=year)
+        round_1 = factories.Round(number=1, season__year=year)
+        round_3 = factories.Round(number=3, season__year=year)
+
+        rounds = queries.get_rounds_for_season(db_session=db_session, year=year)
+
+        assert len(rounds) == 3
+        assert rounds[0].number == round_1.number
+        assert rounds[1].number == round_2.number
+        assert rounds[2].number == round_3.number
+
+    def test_returns_empty_list_if_no_rounds_for_season(self, db_session):
+        year = 1995
+
+        rounds = queries.get_rounds_for_season(db_session=db_session, year=year)
+
+        assert rounds == []

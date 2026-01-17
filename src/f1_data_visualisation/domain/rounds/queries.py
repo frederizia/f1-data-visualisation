@@ -30,3 +30,27 @@ def get_round(db_session: orm.Session, number: int, year: int) -> entities.Round
         date_from=round_model.date_from,
         date_to=round_model.date_to,
     )
+
+
+def get_rounds_for_season(db_session: orm.Session, year: int) -> list[entities.Round]:
+    """
+    Retrieve all rounds for a given season year.
+    """
+    query = (
+        sqlalchemy.select(models.Round)
+        .join(models.Season)
+        .filter(models.Season.year == year)
+        .order_by(models.Round.number)
+    )
+    round_models = db_session.execute(query).scalars().all()
+    return [
+        entities.Round(
+            number=round_model.number,
+            country=round_model.country,
+            location=round_model.location,
+            name=round_model.name,
+            date_from=round_model.date_from,
+            date_to=round_model.date_to,
+        )
+        for round_model in round_models
+    ]
