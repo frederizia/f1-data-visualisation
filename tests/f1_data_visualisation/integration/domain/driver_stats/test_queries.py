@@ -1,6 +1,7 @@
 import pytest
 
 from f1_data_visualisation.domain.driver_stats import queries
+from f1_data_visualisation.domain.sessions import entities as session_entities
 from tests.f1_data_visualisation import factories
 
 
@@ -88,3 +89,140 @@ class TestGetTotalPointsForDriverAcrossSeasons:
                 driver_id=non_existent_driver_id,
                 years=[2020],
             )
+
+
+class TestGetDriverPositionsPerRound:
+    def test_correctly_retrieves_driver_positions_per_round(self, db_session):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+
+        # Create 2 rounds, one with just a main race, one with a sprint and main race.
+        round1 = factories.Round(number=1, season=season)
+        quali_rd1 = factories.Session(
+            round=round1, type=session_entities.SessionType.QUALIFYING.value
+        )
+        main_race_rd1 = factories.Session(
+            round=round1, type=session_entities.SessionType.RACE.value
+        )
+        # Driver results: quali=2, grid=3, position=1
+        factories.DriverQualifyingResult(driver=driver, session=quali_rd1, position=2)
+        factories.DriverRaceResult(
+            driver=driver, session=main_race_rd1, grid_position=3, position=1
+        )
+
+        round2 = factories.Round(number=2, season=season)
+        quali_sprint_rd2 = factories.Session(
+            round=round2, type=session_entities.SessionType.SPRINT_QUALIFYING.value
+        )
+        sprint_rd2 = factories.Session(
+            round=round2, type=session_entities.SessionType.SPRINT_RACE.value
+        )
+        quali_rd2 = factories.Session(
+            round=round2, type=session_entities.SessionType.QUALIFYING.value
+        )
+        main_race_rd2 = factories.Session(
+            round=round2, type=session_entities.SessionType.RACE.value
+        )
+        # Driver results: sprint quali=1, sprint grid=2, sprint position=3
+        factories.DriverQualifyingResult(driver=driver, session=quali_sprint_rd2, position=1)
+        factories.DriverRaceResult(driver=driver, session=sprint_rd2, grid_position=2, position=3)
+        # Driver results: quali=4, grid=5, position=2
+        factories.DriverQualifyingResult(driver=driver, session=quali_rd2, position=4)
+        factories.DriverRaceResult(
+            driver=driver, session=main_race_rd2, grid_position=5, position=2
+        )
+
+        driver_positions = queries.get_driver_positions_per_round(
+            db_session=db_session, driver_id=driver.id, year=2022
+        )
+
+        # Check if the positions are correctly retrieved.
+        assert len(driver_positions) == 2
+        assert driver_positions == [
+            queries.DriverPositionsForRound(
+                round_number=1,
+                main_race=queries.RaceInRound(
+                    qualifying_position=2,
+                    grid_position=3,
+                    position=1,
+                ),
+                sprint_race=None,
+            ),
+            queries.DriverPositionsForRound(
+                round_number=2,
+                main_race=queries.RaceInRound(
+                    qualifying_position=4,
+                    grid_position=5,
+                    position=2,
+                ),
+                sprint_race=queries.RaceInRound(
+                    qualifying_position=1,
+                    grid_position=2,
+                    position=3,
+                ),
+            ),
+        ]
+
+    def test_returns_empty_list_if_no_data(self, db_session):
+        driver = factories.Driver()
+
+        driver_positions = queries.get_driver_positions_per_round(
+            db_session=db_session, driver_id=driver.id, year=2022
+        )
+
+        assert driver_positions == []
+
+    def test_sessions_exist_but_driver_has_no_results(self, db_session):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+
+        round1 = factories.Round(number=1, season=season)
+        # Create sprint and main race sessions without driver results.
+        factories.Session(round=round1, type=session_entities.SessionType.SPRINT_QUALIFYING.value)
+        factories.Session(round=round1, type=session_entities.SessionType.SPRINT_RACE.value)
+        factories.Session(round=round1, type=session_entities.SessionType.QUALIFYING.value)
+        factories.Session(round=round1, type=session_entities.SessionType.RACE.value)
+
+        driver_positions = queries.get_driver_positions_per_round(
+            db_session=db_session, driver_id=driver.id, year=2022
+        )
+
+        assert driver_positions == [
+            queries.DriverPositionsForRound(
+                round_number=1,
+                sprint_race=None,
+                main_race=None,
+            )
+        ]
+
+    def test_race_weekend_without_a_sprint_race_is_handled(self, db_session):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+
+        round1 = factories.Round(number=1, season=season)
+        quali_rd1 = factories.Session(
+            round=round1, type=session_entities.SessionType.QUALIFYING.value
+        )
+        main_race_rd1 = factories.Session(
+            round=round1, type=session_entities.SessionType.RACE.value
+        )
+        # Driver results: quali=1, grid=1, position=1 (what a weekend!)
+        factories.DriverQualifyingResult(driver=driver, session=quali_rd1, position=1)
+        factories.DriverRaceResult(
+            driver=driver, session=main_race_rd1, grid_position=1, position=1
+        )
+
+        driver_positions = queries.get_driver_positions_per_round(
+            db_session=db_session, driver_id=driver.id, year=2022
+        )
+        assert driver_positions == [
+            queries.DriverPositionsForRound(
+                round_number=1,
+                main_race=queries.RaceInRound(
+                    qualifying_position=1,
+                    grid_position=1,
+                    position=1,
+                ),
+                sprint_race=None,
+            )
+        ]

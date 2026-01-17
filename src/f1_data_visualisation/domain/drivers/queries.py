@@ -175,7 +175,7 @@ def get_session_result_for_driver(
         )
     if result_model.session.type in (
         session_entities.SessionType.QUALIFYING.value,
-        session_entities.SessionType.SPRINT_QUALIFYING,
+        session_entities.SessionType.SPRINT_QUALIFYING.value,
     ):
         return entities.QualifyingDriverResult(
             id=result_model.id,
