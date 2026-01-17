@@ -17,7 +17,6 @@ class Season(factory.alchemy.SQLAlchemyModelFactory):
         model = models.Season
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
 
-    id = factory.Sequence(lambda n: n + 1)
     year = factory.Sequence(lambda n: 2000 + n)
 
 
@@ -26,7 +25,6 @@ class Round(factory.alchemy.SQLAlchemyModelFactory):
         model = models.Round
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
 
-    id = factory.Sequence(lambda n: n + 1)
     season = factory.SubFactory(Season)
     number = factory.Sequence(lambda n: n + 1)
     country = factory.Faker("country")
@@ -43,7 +41,6 @@ class Session(factory.alchemy.SQLAlchemyModelFactory):
         model = models.Session
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
 
-    id = factory.Sequence(lambda n: n + 1)
     round = factory.SubFactory(Round)
     type = factory.LazyFunction(lambda: random.choice(list(SessionType)).value)
     date = factory.LazyFunction(lambda: datetime.datetime.now(datetime.UTC).date())
@@ -54,8 +51,6 @@ class Constructor(factory.alchemy.SQLAlchemyModelFactory):
         model = models.Constructor
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
 
-    id = factory.Sequence(lambda n: n + 1)
-
     name = factory.Sequence(lambda n: f"{fake.last_name()} {n} Racing")
 
 
@@ -63,8 +58,6 @@ class Driver(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.Driver
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
-
-    id = factory.Sequence(lambda n: n + 1)
 
     first_name = factory.Faker("first_name")
     last_name = factory.Faker("last_name")
@@ -75,8 +68,6 @@ class DriverSeason(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.DriverSeason
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
-
-    id = factory.Sequence(lambda n: n + 1)
 
     number = factory.Sequence(lambda n: n + 1)
     short_code = factory.LazyAttribute(lambda o: o.driver.last_name[:3].upper())
@@ -90,8 +81,6 @@ class DriverRaceResult(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.DriverSessionResult
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
-
-    id = factory.Sequence(lambda n: n + 1)
 
     session = factory.SubFactory(Session, type=SessionType.RACE.value)
     driver = factory.SubFactory(Driver)
@@ -118,8 +107,6 @@ class DriverQualifyingResult(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = models.DriverSessionResult
         sqlalchemy_session_persistence = factory.alchemy.SESSION_PERSISTENCE_FLUSH
-
-    id = factory.Sequence(lambda n: n + 1)
 
     session = factory.SubFactory(Session, type=SessionType.QUALIFYING.value)
     driver = factory.SubFactory(Driver)
