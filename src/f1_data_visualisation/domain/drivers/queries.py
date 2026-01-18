@@ -256,6 +256,36 @@ def get_driver_race_results_for_season(
     ]
 
 
+def get_drivers_per_season(db_session: orm.Session, year: int) -> list[entities.Driver]:
+    """
+    Retrieve all unique drivers who participated in a given season.
+
+    We only count drivers that participated in a race, i.e. are part of the standings.
+    """
+    query = (
+        sqlalchemy.select(models.Driver)
+        .join(models.DriverSessionResult)
+        .join(models.Session)
+        .join(models.Round)
+        .join(models.Season)
+        .filter(
+            models.Season.year == year,
+            models.Session.type == session_entities.SessionType.RACE.value,
+        )
+        .distinct()
+    )
+    driver_models = db_session.execute(query).scalars().all()
+    return [
+        entities.Driver(
+            id=driver_model.id,
+            first_name=driver_model.first_name,
+            last_name=driver_model.last_name,
+            display_name=driver_model.display_name,
+        )
+        for driver_model in driver_models
+    ]
+
+
 def _get_constructor_from_result(result_model: models.DriverSessionResult) -> entities.Constructor:
     return entities.Constructor(
         id=result_model.constructor.id,

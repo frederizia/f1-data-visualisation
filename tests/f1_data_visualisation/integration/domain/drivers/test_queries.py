@@ -240,3 +240,52 @@ class TestGetDriverRaceResultsForSeason:
         )
 
         assert len(race_results) == 2
+
+
+class TestGetDriversPerSeason:
+    def test_returns_drivers_for_season(self, db_session):
+        season = factories.Season(year=2023)
+        round1 = factories.Round()
+        race_rd1 = factories.Session(
+            round=round1, round__season=season, type=session_entities.SessionType.RACE.value
+        )
+        race_rd2 = factories.Session(
+            round__number=2, round__season=season, type=session_entities.SessionType.RACE.value
+        )
+        # Let's add a qualifying practice session that another driver participated in.
+        quali_rd1 = factories.Session(
+            round=round1,
+            round__season=season,
+            type=session_entities.SessionType.QUALIFYING.value,
+        )
+
+        # Let's create some drivers and their results.
+        # Driver who participated in 2 races.
+        multiple_race_driver = factories.Driver()
+        factories.DriverRaceResult(
+            session=race_rd1,
+            driver=multiple_race_driver,
+        )
+        factories.DriverRaceResult(
+            session=race_rd2,
+            driver=multiple_race_driver,
+        )
+        # Driver who only participated in round 2.
+        single_race_driver = factories.Driver()
+        factories.DriverRaceResult(session=race_rd2, driver=single_race_driver)
+        # Driver who only participated in the practice session.
+        quali_only_driver = factories.Driver()
+        factories.DriverQualifyingResult(
+            session=quali_rd1,
+            driver=quali_only_driver,
+        )
+
+        drivers = queries.get_drivers_per_season(
+            db_session=db_session,
+            year=season.year,
+        )
+
+        # We expect 2 drivers to be returned.
+        assert len(drivers) == 2
+        driver_ids = {driver.id for driver in drivers}
+        assert driver_ids == {multiple_race_driver.id, single_race_driver.id}
