@@ -71,6 +71,8 @@ class DriverSeason(factory.alchemy.SQLAlchemyModelFactory):
 
     number = factory.Sequence(lambda n: n + 1)
     short_code = factory.LazyAttribute(lambda o: o.driver.last_name[:3].upper())
+    position = factory.LazyFunction(lambda: random.randint(1, 20))
+    points = factory.LazyFunction(lambda: float(random.randint(0, 300)))
 
     driver = factory.SubFactory(Driver)
 

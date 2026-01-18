@@ -132,6 +132,8 @@ class FastF1:
                     id=None,
                     number=driver_number,
                     short_code=driver_session_result["Abbreviation"],
+                    position=None,
+                    points=None,
                 )
                 position = (
                     int(driver_session_result["Position"])

@@ -36,6 +36,8 @@ class DriverSeason:
     id: int | None
     number: int
     short_code: str
+    position: int | None
+    points: float | None
 
 
 @attrs.frozen

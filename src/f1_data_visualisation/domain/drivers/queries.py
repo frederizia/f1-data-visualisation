@@ -50,6 +50,8 @@ def get_driver_information_for_season(
         short_code=driver_season_model.short_code,
         driver=driver,
         season=season,
+        position=driver_season_model.position,
+        points=driver_season_model.points,
     )
 
 
@@ -75,6 +77,8 @@ def get_driver_with_season_info(
             id=season_model.id,
             number=season_model.number,
             short_code=season_model.short_code,
+            position=season_model.position,
+            points=season_model.points,
             season=season_entities.Season(
                 id=season_model.season.id, year=season_model.season.year
             ),

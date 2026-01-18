@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+from f1_data_visualisation.data import models
 from f1_data_visualisation.domain.drivers import entities, operations
 from f1_data_visualisation.domain.sessions import entities as session_entities
 from tests.f1_data_visualisation import factories
@@ -213,3 +214,33 @@ class TestGetOrCreateQualifyingResult:
         assert created
         assert qualifying_result.constructor.name == constructor_name
         assert qualifying_result.position == 3
+
+
+class TestAddPointsAndPositionToDriverSeason:
+    def test_adds_points_and_position(self, db_session):
+        driver_season = factories.DriverSeason(points=0.0, position=None)
+
+        operations.add_points_and_positions_to_driver_season(
+            db_session=db_session,
+            driver_id=driver_season.driver.id,
+            year=driver_season.season.year,
+            points=123.0,
+            position=7,
+        )
+
+        updated_driver_season = db_session.get(
+            models.DriverSeason,
+            driver_season.id,
+        )
+        assert updated_driver_season.points == 123.0
+        assert updated_driver_season.position == 7
+
+    def test_raises_if_driver_season_does_not_exist(self, db_session):
+        with pytest.raises(operations.UnableToUpdateDriverSeasonError):
+            operations.add_points_and_positions_to_driver_season(
+                db_session=db_session,
+                driver_id=999,
+                year=2022,
+                points=50.0,
+                position=5,
+            )
