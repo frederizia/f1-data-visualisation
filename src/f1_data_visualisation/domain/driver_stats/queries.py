@@ -249,3 +249,42 @@ def _get_main_race_positions(
         grid_position=race_result.grid_position,
         position=race_result.position,
     )
+
+
+@attrs.frozen
+class DriverSeasonStanding:
+    driver: driver_entities.Driver
+    position: int
+    points: float
+
+
+def get_season_standings(db_session: orm.Session, year: int) -> list[DriverSeasonStanding]:
+    """
+    Retrieve the driver standings for a given season.
+    """
+    # Loop over all drivers who participated in the season and get their total points.
+    drivers_in_season = driver_queries.get_drivers_per_season(db_session=db_session, year=year)
+    # Get the total points per driver.
+    driver_points: dict[driver_entities.Driver, float] = {}
+    for driver in drivers_in_season:
+        # Appease the type checker.
+        assert driver.id is not None
+        accumulated_points_per_round = get_accumulative_points_per_round_for_driver(
+            db_session=db_session, driver_id=driver.id, year=year
+        )
+        if not accumulated_points_per_round:
+            continue
+        total_points = accumulated_points_per_round[-1].accumulated_points
+        driver_points[driver] = total_points
+    # Now sort the drivers by points to get the standings.
+    sorted_drivers = sorted(driver_points.items(), key=lambda item: item[1], reverse=True)
+    standings: list[DriverSeasonStanding] = []
+    for position, (driver, points) in enumerate(sorted_drivers, start=1):
+        standings.append(
+            DriverSeasonStanding(
+                driver=driver,
+                position=position,
+                points=points,
+            )
+        )
+    return standings

@@ -226,3 +226,44 @@ class TestGetDriverPositionsPerRound:
                 sprint_race=None,
             )
         ]
+
+
+class TestGetSeasonStandings:
+    def test_returns_correct_standings(self, db_session):
+        season = factories.Season(year=2022)
+
+        # Create 3 drivers with different points.
+        first_place_driver = factories.Driver()
+        second_place_driver = factories.Driver()
+        third_place_driver = factories.Driver()
+
+        # Create some rounds for the season.
+        round1 = factories.Round(number=1, season=season)
+        round2 = factories.Round(number=2, season=season)
+        round3 = factories.Round(number=3, season=season)
+        rounds = [round1, round2, round3]
+
+        self._create_race_results(driver=first_place_driver, rounds=rounds, points_multiplier=3)
+        self._create_race_results(driver=second_place_driver, rounds=rounds, points_multiplier=2)
+        self._create_race_results(driver=third_place_driver, rounds=rounds, points_multiplier=1)
+
+        standings = queries.get_season_standings(db_session=db_session, year=2022)
+
+        assert len(standings) == 3
+        assert standings[0].driver.id == first_place_driver.id
+        assert standings[0].position == 1
+        assert standings[0].points == 18
+        assert standings[1].driver.id == second_place_driver.id
+        assert standings[1].position == 2
+        assert standings[1].points == 12
+        assert standings[2].driver.id == third_place_driver.id
+        assert standings[2].position == 3
+        assert standings[2].points == 6
+
+    def _create_race_results(self, driver, rounds, points_multiplier: int) -> None:
+        for i, round_ in enumerate(rounds):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round=round_,
+                points=(i + 1) * points_multiplier,
+            )
