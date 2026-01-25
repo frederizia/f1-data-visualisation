@@ -12,6 +12,10 @@ class UnableToCreateDriverSeasonError(Exception):
     pass
 
 
+class UnableToUpdateDriverSeasonError(Exception):
+    pass
+
+
 class UnableToCreateDriverResultError(Exception):
     pass
 
@@ -103,6 +107,8 @@ def get_or_create_driver_season(
         short_code=driver_season_model.short_code,
         driver=driver,
         season=season,
+        position=None,
+        points=None,
     ), True
 
 
@@ -110,12 +116,12 @@ def get_or_create_race_result(
     db_session: orm.Session,
     driver_id: int,
     session_id: int,
-    position: int,
+    position: int | None,
     constructor_name: str,
     laps_completed: int,
     points: float,
     status: entities.DriverSessionClassificationStatus,
-    grid_position: int,
+    grid_position: int | None,
     time: datetime.timedelta | None,
 ) -> tuple[entities.RaceDriverResult, bool]:
     """
@@ -204,3 +210,35 @@ def get_or_create_qualifying_result(
         q2_time=q2_time,
         q3_time=q3_time,
     ), True
+
+
+def add_points_and_positions_to_driver_season(
+    db_session: orm.Session,
+    driver_id: int,
+    year: int,
+    points: float,
+    position: int,
+) -> None:
+    """
+    Store the total points and position for a driver in a given season.
+
+    The season itself should already exist.
+    """
+    driver_season = queries.get_driver_information_for_season(
+        db_session=db_session,
+        driver_id=driver_id,
+        year=year,
+    )
+    if not driver_season:
+        raise UnableToUpdateDriverSeasonError(
+            f"Driver season info for driver ID {driver_id} and year {year} does not exist."
+        )
+    driver_season_model = db_session.get(
+        models.DriverSeason,
+        driver_season.id,
+    )
+    assert driver_season_model is not None
+    driver_season_model.points = points
+    driver_season_model.position = position
+    db_session.add(driver_season_model)
+    db_session.flush()

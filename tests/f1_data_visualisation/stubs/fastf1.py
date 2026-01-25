@@ -42,6 +42,8 @@ class FakeSuccessfulFastF1(fastf1.FastF1):
                             id=None,
                             number=4,
                             short_code="NOR",
+                            position=None,
+                            points=None,
                         ),
                         driver=driver_entities.Driver(
                             id=None,
@@ -66,6 +68,8 @@ class FakeSuccessfulFastF1(fastf1.FastF1):
                             id=None,
                             number=18,
                             short_code="STR",
+                            position=None,
+                            points=None,
                         ),
                         driver=driver_entities.Driver(
                             id=None,
@@ -98,6 +102,8 @@ class FakeSuccessfulFastF1(fastf1.FastF1):
                             id=None,
                             number=4,
                             short_code="NOR",
+                            position=None,
+                            points=None,
                         ),
                         driver=driver_entities.Driver(
                             id=None,
@@ -124,6 +130,8 @@ class FakeSuccessfulFastF1(fastf1.FastF1):
                             id=None,
                             number=18,
                             short_code="STR",
+                            position=None,
+                            points=None,
                         ),
                         driver=driver_entities.Driver(
                             id=None,

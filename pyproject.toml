@@ -199,6 +199,7 @@ name = "Domain modules hierarchy"
 type = "layers"
 containers = ["f1_data_visualisation.domain"]
 layers = [
+    "driver_stats",
     "vendor_adapters",
     "drivers",
     "sessions",

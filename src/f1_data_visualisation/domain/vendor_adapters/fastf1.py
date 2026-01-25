@@ -132,6 +132,13 @@ class FastF1:
                     id=None,
                     number=driver_number,
                     short_code=driver_session_result["Abbreviation"],
+                    position=None,
+                    points=None,
+                )
+                position = (
+                    int(driver_session_result["Position"])
+                    if pd.notna(driver_session_result["Position"])
+                    else None
                 )
                 if session_type in QUALIFYING_SESSION_TYPES:
                     parsed_driver_session_result = driver_entities.QualifyingDriverResult(
@@ -141,9 +148,7 @@ class FastF1:
                             name=driver_session_result["TeamName"],
                         ),
                         # The position is returned as a float for some reason.
-                        position=int(driver_session_result["Position"])
-                        if pd.notna(driver_session_result["Position"])
-                        else None,
+                        position=position,
                         q1_time=driver_session_result["Q1"].to_pytimedelta()
                         if pd.notna(driver_session_result["Q1"])
                         else None,
@@ -155,13 +160,18 @@ class FastF1:
                         else None,
                     )
                 else:
+                    grid_position = (
+                        int(driver_session_result["GridPosition"])
+                        if pd.notna(driver_session_result["GridPosition"])
+                        else None
+                    )
                     parsed_driver_session_result = driver_entities.RaceDriverResult(
                         id=None,
                         constructor=driver_entities.Constructor(
                             id=None,
                             name=driver_session_result["TeamName"],
                         ),
-                        position=int(driver_session_result["Position"]),
+                        position=position,
                         # Laps are returned as a float.
                         laps_completed=int(driver_session_result["Laps"]),
                         # This is a numpy.float64 so needs to converted to an inbuilt float.
@@ -169,7 +179,7 @@ class FastF1:
                         status=self._derive_classification_status(
                             driver_session_result["ClassifiedPosition"]
                         ),
-                        grid_position=int(driver_session_result["GridPosition"]),
+                        grid_position=grid_position,
                         time=(
                             driver_session_result["Time"].to_pytimedelta()
                             if pd.notna(driver_session_result["Time"])

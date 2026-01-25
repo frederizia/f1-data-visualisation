@@ -5,6 +5,7 @@ from sqlalchemy import orm
 
 from f1_data_visualisation.data import models
 from f1_data_visualisation.domain.drivers import entities
+from f1_data_visualisation.domain.rounds import entities as round_entities
 from f1_data_visualisation.domain.seasons import entities as season_entities
 from f1_data_visualisation.domain.sessions import entities as session_entities
 
@@ -49,6 +50,8 @@ def get_driver_information_for_season(
         short_code=driver_season_model.short_code,
         driver=driver,
         season=season,
+        position=driver_season_model.position,
+        points=driver_season_model.points,
     )
 
 
@@ -74,6 +77,8 @@ def get_driver_with_season_info(
             id=season_model.id,
             number=season_model.number,
             short_code=season_model.short_code,
+            position=season_model.position,
+            points=season_model.points,
             season=season_entities.Season(
                 id=season_model.season.id, year=season_model.season.year
             ),
@@ -174,7 +179,7 @@ def get_session_result_for_driver(
         )
     if result_model.session.type in (
         session_entities.SessionType.QUALIFYING.value,
-        session_entities.SessionType.SPRINT_QUALIFYING,
+        session_entities.SessionType.SPRINT_QUALIFYING.value,
     ):
         return entities.QualifyingDriverResult(
             id=result_model.id,
@@ -193,6 +198,92 @@ def get_session_result_for_driver(
     raise UnsupportedSessionTypeError(
         f"Session type {result_model.session.type} is not supported for driver results."
     )
+
+
+def get_driver_race_results_for_season(
+    db_session: orm.Session, driver_id: int, year: int
+) -> list[entities.RaceDriverResultWithSession]:
+    """
+    Retrieve all race results for a given driver in a given season.
+    """
+    query = (
+        sqlalchemy.select(models.DriverSessionResult)
+        .join(models.Session)
+        .join(models.Round)
+        .join(models.Season)
+        .filter(
+            models.DriverSessionResult.driver_id == driver_id,
+            models.Season.year == year,
+            models.Session.type.in_(
+                [
+                    session_entities.SessionType.RACE.value,
+                    session_entities.SessionType.SPRINT_RACE.value,
+                ]
+            ),
+        )
+    )
+    results = db_session.execute(query).scalars().all()
+    return [
+        entities.RaceDriverResultWithSession(
+            id=result_model.id,
+            constructor=_get_constructor_from_result(result_model),
+            position=result_model.position,
+            laps_completed=result_model.laps_completed,
+            points=result_model.points,
+            status=entities.DriverSessionClassificationStatus(result_model.classification_status),
+            grid_position=result_model.grid_position,
+            time=datetime.timedelta(seconds=result_model.time) if result_model.time else None,
+            session=session_entities.SessionWithRound(
+                id=result_model.session.id,
+                type=session_entities.SessionType(result_model.session.type),
+                date=result_model.session.date,
+                round=round_entities.RoundWithSeason(
+                    id=result_model.session.round.id,
+                    number=result_model.session.round.number,
+                    name=result_model.session.round.name,
+                    country=result_model.session.round.country,
+                    location=result_model.session.round.location,
+                    date_from=result_model.session.round.date_from,
+                    date_to=result_model.session.round.date_to,
+                    season=season_entities.Season(
+                        id=result_model.session.round.season.id,
+                        year=result_model.session.round.season.year,
+                    ),
+                ),
+            ),
+        )
+        for result_model in results
+    ]
+
+
+def get_drivers_per_season(db_session: orm.Session, year: int) -> list[entities.Driver]:
+    """
+    Retrieve all unique drivers who participated in a given season.
+
+    We only count drivers that participated in a race, i.e. are part of the standings.
+    """
+    query = (
+        sqlalchemy.select(models.Driver)
+        .join(models.DriverSessionResult)
+        .join(models.Session)
+        .join(models.Round)
+        .join(models.Season)
+        .filter(
+            models.Season.year == year,
+            models.Session.type == session_entities.SessionType.RACE.value,
+        )
+        .distinct()
+    )
+    driver_models = db_session.execute(query).scalars().all()
+    return [
+        entities.Driver(
+            id=driver_model.id,
+            first_name=driver_model.first_name,
+            last_name=driver_model.last_name,
+            display_name=driver_model.display_name,
+        )
+        for driver_model in driver_models
+    ]
 
 
 def _get_constructor_from_result(result_model: models.DriverSessionResult) -> entities.Constructor:

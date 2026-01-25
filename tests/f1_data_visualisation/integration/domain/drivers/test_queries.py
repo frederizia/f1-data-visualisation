@@ -180,3 +180,112 @@ class TestGetSessionResultForDriver:
                 session_id=existing_session_result.session.id,
                 driver_id=existing_session_result.driver.id,
             )
+
+
+class TestGetDriverRaceResultsForSeason:
+    def test_returns_all_race_results(self, db_session):
+        driver = factories.Driver()
+        season = factories.Season()
+        for i in range(3):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+            )
+
+        race_results = queries.get_driver_race_results_for_season(
+            db_session=db_session, year=season.year, driver_id=driver.id
+        )
+
+        assert len(race_results) == 3
+
+    def test_irrelevant_results_are_excluded(self, db_session):
+        driver = factories.Driver()
+        other_driver = factories.Driver()
+        season = factories.Season(year=2022)
+        other_season = factories.Season(year=2021)
+
+        # Relevant results.
+        for i in range(2):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+            )
+
+        # Irrelevant results:
+        # Results for right season but different driver.
+        factories.DriverRaceResult(
+            driver=other_driver,
+            session__round__season=season,
+        )
+        # Results for right driver but different season.
+        factories.DriverRaceResult(
+            driver=driver,
+            session__round__season=other_season,
+        )
+        # Result for wrong driver and wrong season.
+        factories.DriverRaceResult(
+            driver=other_driver,
+            session__round__season=other_season,
+        )
+        # Quali session result for right driver and season.
+        factories.DriverQualifyingResult(
+            driver=driver,
+            session__round__season=season,
+        )
+
+        race_results = queries.get_driver_race_results_for_season(
+            db_session=db_session, year=season.year, driver_id=driver.id
+        )
+
+        assert len(race_results) == 2
+
+
+class TestGetDriversPerSeason:
+    def test_returns_drivers_for_season(self, db_session):
+        season = factories.Season(year=2023)
+        round1 = factories.Round()
+        race_rd1 = factories.Session(
+            round=round1, round__season=season, type=session_entities.SessionType.RACE.value
+        )
+        race_rd2 = factories.Session(
+            round__number=2, round__season=season, type=session_entities.SessionType.RACE.value
+        )
+        # Let's add a qualifying practice session that another driver participated in.
+        quali_rd1 = factories.Session(
+            round=round1,
+            round__season=season,
+            type=session_entities.SessionType.QUALIFYING.value,
+        )
+
+        # Let's create some drivers and their results.
+        # Driver who participated in 2 races.
+        multiple_race_driver = factories.Driver()
+        factories.DriverRaceResult(
+            session=race_rd1,
+            driver=multiple_race_driver,
+        )
+        factories.DriverRaceResult(
+            session=race_rd2,
+            driver=multiple_race_driver,
+        )
+        # Driver who only participated in round 2.
+        single_race_driver = factories.Driver()
+        factories.DriverRaceResult(session=race_rd2, driver=single_race_driver)
+        # Driver who only participated in the practice session.
+        quali_only_driver = factories.Driver()
+        factories.DriverQualifyingResult(
+            session=quali_rd1,
+            driver=quali_only_driver,
+        )
+
+        drivers = queries.get_drivers_per_season(
+            db_session=db_session,
+            year=season.year,
+        )
+
+        # We expect 2 drivers to be returned.
+        assert len(drivers) == 2
+        driver_ids = {driver.id for driver in drivers}
+        assert driver_ids == {multiple_race_driver.id, single_race_driver.id}

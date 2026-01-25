@@ -4,6 +4,7 @@ import enum
 import attrs
 
 from f1_data_visualisation.domain.seasons import entities as season_entities
+from f1_data_visualisation.domain.sessions import entities as session_entities
 
 
 class DriverSessionClassificationStatus(enum.Enum):
@@ -35,6 +36,8 @@ class DriverSeason:
     id: int | None
     number: int
     short_code: str
+    position: int | None
+    points: float | None
 
 
 @attrs.frozen
@@ -57,23 +60,27 @@ class DriverWithSeasons(Driver):
 class BaseDriverSessionResult:
     id: int | None
     constructor: Constructor
+    # Sometimes (rarely) no position is assigned, e.g. when a driver does not participate in
+    # qualifying or the race.
+    position: int | None
 
 
 @attrs.frozen
 class RaceDriverResult(BaseDriverSessionResult):
-    position: int
     laps_completed: int
     points: float
     status: DriverSessionClassificationStatus
-    grid_position: int
+    grid_position: int | None
     time: datetime.timedelta | None
 
 
 @attrs.frozen
+class RaceDriverResultWithSession(RaceDriverResult):
+    session: session_entities.SessionWithRound
+
+
+@attrs.frozen
 class QualifyingDriverResult(BaseDriverSessionResult):
-    # Sometimes (rarely) no position is assigned, e.g. when a driver does not participate in
-    # qualifying.
-    position: int | None
     q1_time: datetime.timedelta | None
     q2_time: datetime.timedelta | None
     q3_time: datetime.timedelta | None

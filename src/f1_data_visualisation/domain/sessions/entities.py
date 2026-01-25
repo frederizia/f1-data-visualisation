@@ -16,6 +16,14 @@ class SessionType(enum.Enum):
     RACE = "Race"
 
 
+COMPETITIVE_SESSION_TYPES = {
+    SessionType.SPRINT_QUALIFYING,
+    SessionType.SPRINT_RACE,
+    SessionType.QUALIFYING,
+    SessionType.RACE,
+}
+
+
 @attrs.frozen
 class Session:
     type: SessionType

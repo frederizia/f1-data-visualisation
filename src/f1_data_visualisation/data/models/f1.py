@@ -118,6 +118,8 @@ class DriverSeason(Base):
 
     number: Mapped[int] = mapped_column(nullable=False)
     short_code: Mapped[str] = mapped_column(nullable=False)
+    position: Mapped[int] = mapped_column(nullable=True)
+    points: Mapped[float] = mapped_column(server_default="0.0")
 
     driver_id: Mapped[int] = mapped_column(ForeignKey("drivers.id"), nullable=False)
     driver = relationship("Driver", back_populates="seasons")
