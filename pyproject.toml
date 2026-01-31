@@ -179,6 +179,8 @@ containers = ["f1_data_visualisation"]
 layers = [
     # Entrypoint
     "main",
+    # Interfaces, e.g. api, web etc
+    "interfaces",
     # Application layer
     "application",
     # Domain layer
