@@ -54,6 +54,11 @@ run_python:
 	uv run python
 
 
+.PHONY: run_api
+run_api:
+	uv run uvicorn src.f1_data_visualisation.interfaces.api.main:app --reload
+
+
 # Database related commands
 .PHONY: run_db_migrations
 run_db_migrations:
