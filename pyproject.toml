@@ -35,16 +35,15 @@ dependencies = [
 dev = [
     # Testing
     "pytest",
-
     # Localdev
     "pre-commit",
-
     # Linting
     # We pin the version so that we don't update ruff and cause a lot of linting errors. Upgrades should be done
     # deliberately.
     "ruff<0.14.10",
     # Type checking
     "ty",
+    "httpx>=0.28.1",
 ]
 
 # ---------
