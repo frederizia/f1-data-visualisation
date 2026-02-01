@@ -41,3 +41,125 @@ def _create_race_results(driver, rounds, points_multiplier: int) -> None:
             session__round=round_,
             points=(i + 1) * points_multiplier,
         )
+
+
+class TestGetPointsPerRound:
+    def test_get_points_per_round_only(self, api_client):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+        driver_season = factories.DriverSeason(driver=driver, season=season)
+
+        for i in range(5):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+                points=i + 1,
+            )
+
+        response = api_client.get(
+            f"/seasons/2022/points/{driver_season.number}?points_type=per_round"
+        )
+
+        assert response.status_code == 200
+        response_data = response.json()
+        assert len(response_data) == 5
+        for i, point_entry in enumerate(response_data):
+            assert point_entry["round_number"] == i + 1
+            assert point_entry["points"] == i + 1
+            assert point_entry["accumulated_points"] is None
+
+    def test_get_accumulative_points_only(self, api_client):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+        driver_season = factories.DriverSeason(driver=driver, season=season)
+
+        for i in range(5):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+                points=i + 1,
+            )
+
+        response = api_client.get(
+            f"/seasons/2022/points/{driver_season.number}?points_type=accumulative"
+        )
+
+        assert response.status_code == 200
+        response_data = response.json()
+        assert len(response_data) == 5
+        total_points = 0
+        for i, point_entry in enumerate(response_data):
+            total_points += i + 1
+            assert point_entry["round_number"] == i + 1
+            assert point_entry["points"] is None
+            assert point_entry["accumulated_points"] == total_points
+
+    def test_get_all_points(self, api_client):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+        driver_season = factories.DriverSeason(driver=driver, season=season)
+
+        for i in range(5):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+                points=i + 1,
+            )
+
+        response = api_client.get(f"/seasons/2022/points/{driver_season.number}?points_type=all")
+
+        assert response.status_code == 200
+        response_data = response.json()
+        assert len(response_data) == 5
+        total_points = 0
+        for i, point_entry in enumerate(response_data):
+            total_points += i + 1
+            assert point_entry["round_number"] == i + 1
+            assert point_entry["points"] == i + 1
+            assert point_entry["accumulated_points"] == total_points
+
+    def test_defaults_to_all_points(self, api_client):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+        driver_season = factories.DriverSeason(driver=driver, season=season)
+
+        for i in range(5):
+            factories.DriverRaceResult(
+                driver=driver,
+                session__round__season=season,
+                session__round__number=i + 1,
+                points=i + 1,
+            )
+
+        response = api_client.get(f"/seasons/2022/points/{driver_season.number}")
+
+        assert response.status_code == 200
+        response_data = response.json()
+        assert len(response_data) == 5
+        total_points = 0
+        for i, point_entry in enumerate(response_data):
+            total_points += i + 1
+            assert point_entry["round_number"] == i + 1
+            assert point_entry["points"] == i + 1
+            assert point_entry["accumulated_points"] == total_points
+
+    def test_returns_empty_list_for_driver_with_no_results(self, api_client):
+        driver = factories.Driver()
+        season = factories.Season(year=2022)
+        driver_season = factories.DriverSeason(driver=driver, season=season)
+
+        response = api_client.get(f"/seasons/2022/points/{driver_season.number}")
+
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data == []
+
+    def test_raises_404_for_non_existent_driver(self, api_client):
+        response = api_client.get("/seasons/2022/points/1")
+
+        assert response.status_code == 404
+        response_data = response.json()
+        assert response_data["detail"] == "Driver not found."
