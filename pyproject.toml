@@ -21,28 +21,29 @@ dependencies = [
     "attrs>=25.4.0",
     "environs>=14.5.0",
     "factory-boy>=3.3.3",
+    "fastapi>=0.128.0",
     "fastf1>=3.7.0",
     "import-linter>=2.9",
     "invoke>=2.2.1",
     "psycopg2>=2.9.11",
     "sqlalchemy>=2.0.45",
     "structlog>=25.5.0",
+    "uvicorn>=0.40.0",
 ]
 
 [dependency-groups]
 dev = [
     # Testing
     "pytest",
-
     # Localdev
     "pre-commit",
-
     # Linting
     # We pin the version so that we don't update ruff and cause a lot of linting errors. Upgrades should be done
     # deliberately.
     "ruff<0.14.10",
     # Type checking
     "ty",
+    "httpx>=0.28.1",
 ]
 
 # ---------
@@ -177,6 +178,8 @@ containers = ["f1_data_visualisation"]
 layers = [
     # Entrypoint
     "main",
+    # Interfaces, e.g. api, web etc
+    "interfaces",
     # Application layer
     "application",
     # Domain layer

@@ -130,6 +130,32 @@ def get_driver_by_id(db_session: orm.Session, database_id: int) -> entities.Driv
     )
 
 
+def get_driver_by_number_for_season(
+    db_session: orm.Session, year: int, number: int
+) -> entities.Driver | None:
+    """
+    Retrieve a driver using the driver number in the given season.
+
+    Driver numbers can change inbetween seasons, which is why we need the season year as well.
+    """
+    query = (
+        sqlalchemy.select(models.Driver)
+        .join(models.DriverSeason)
+        .join(models.Season)
+        .filter(models.DriverSeason.number == number, models.Season.year == year)
+    )
+    try:
+        driver_model = db_session.execute(query).scalars().one()
+    except sqlalchemy.exc.NoResultFound:  # type: ignore[possibly-missing-attribute]
+        return None
+    return entities.Driver(
+        id=driver_model.id,
+        first_name=driver_model.first_name,
+        last_name=driver_model.last_name,
+        display_name=driver_model.display_name,
+    )
+
+
 def get_constructor(db_session: orm.Session, name: str) -> entities.Constructor | None:
     """
     Retrieve a constructor using the name as identifier.

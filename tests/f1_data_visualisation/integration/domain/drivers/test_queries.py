@@ -99,6 +99,36 @@ class TestGetDriverById:
         assert driver is None
 
 
+class TestGetDriverByNumberForSeason:
+    def test_returns_driver_if_exists(self, db_session):
+        driver_season = factories.DriverSeason()
+
+        driver = queries.get_driver_by_number_for_season(
+            db_session=db_session,
+            number=driver_season.number,
+            year=driver_season.season.year,
+        )
+
+        assert driver.id == driver_season.driver.id
+        assert driver.display_name == driver_season.driver.display_name
+
+    def test_returns_none_if_driver_does_not_exist(self, db_session):
+        driver = queries.get_driver_by_number_for_season(
+            db_session=db_session, number=1, year=2025
+        )
+
+        assert driver is None
+
+    def test_returns_none_if_driver_number_does_not_match_season(self, db_session):
+        season = factories.Season(year=2025)
+        driver_season = factories.DriverSeason(season=season)
+        driver = queries.get_driver_by_number_for_season(
+            db_session=db_session, number=driver_season.number, year=2024
+        )
+
+        assert driver is None
+
+
 class TestGetConstructor:
     def test_returns_constructor_if_exists(self, db_session):
         existing_constructor = factories.Constructor()
